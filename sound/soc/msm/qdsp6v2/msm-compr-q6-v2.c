@@ -27,7 +27,6 @@
 #include <sound/control.h>
 #include <asm/dma.h>
 #include <linux/dma-mapping.h>
-#include <linux/android_pmem.h>
 
 #include "msm-compr-q6-v2.h"
 #include "msm-pcm-routing-v2.h"
