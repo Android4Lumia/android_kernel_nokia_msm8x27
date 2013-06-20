@@ -68,6 +68,4 @@ extern struct reserve_info *reserve_info;
 
 int __init dt_scan_for_memory_reserve(unsigned long node, const char *uname,
 					int depth, void *data);
-
-unsigned long __init reserve_memory_for_fmem(unsigned long, unsigned long);
 #endif

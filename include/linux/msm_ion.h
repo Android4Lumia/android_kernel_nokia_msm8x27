@@ -104,7 +104,6 @@ enum cp_mem_usage {
 #define ION_WB_HEAP_NAME	"wb"
 #define ION_MM_FIRMWARE_HEAP_NAME	"mm_fw"
 #define ION_QSECOM_HEAP_NAME	"qsecom"
-#define ION_FMEM_HEAP_NAME	"fmem"
 
 #define ION_SET_CACHED(__cache)		(__cache | ION_FLAG_CACHED)
 #define ION_SET_UNCACHED(__cache)	(__cache & ~ION_FLAG_CACHED)
@@ -130,12 +129,7 @@ enum cp_mem_usage {
  * @secure_size:	Memory size for securing the heap.
  *			Note: This might be different from actual size
  *			of this heap in the case of a shared heap.
- * @reusable		Flag indicating whether this heap is reusable of not.
- *			(see FMEM)
- * @mem_is_fmem		Flag indicating whether this memory is coming from fmem
- *			or not.
  * @fixed_position	If nonzero, position in the fixed area.
- * @virt_addr:		Virtual address used when using fmem.
  * @iommu_map_all:	Indicates whether we should map whole heap into IOMMU.
  * @iommu_2x_map_domain: Indicates the domain to use for overmapping.
  * @request_region:	function to be called when the number of allocations
@@ -152,13 +146,10 @@ struct ion_cp_heap_pdata {
 	unsigned int align;
 	ion_phys_addr_t secure_base; /* Base addr used when heap is shared */
 	size_t secure_size; /* Size used for securing heap when heap is shared*/
-	int reusable;
-	int mem_is_fmem;
 	int is_cma;
 	enum ion_fixed_position fixed_position;
 	int iommu_map_all;
 	int iommu_2x_map_domain;
-	ion_virt_addr_t *virt_addr;
 	int (*request_region)(void *);
 	int (*release_region)(void *);
 	void *(*setup_region)(void);
@@ -170,8 +161,6 @@ struct ion_cp_heap_pdata {
  * struct ion_co_heap_pdata - defines a carveout heap in the given platform
  * @adjacent_mem_id:	Id of heap that this heap must be adjacent to.
  * @align:		Alignment requirement for the memory
- * @mem_is_fmem		Flag indicating whether this memory is coming from fmem
- *			or not.
  * @fixed_position	If nonzero, position in the fixed area.
  * @request_region:	function to be called when the number of allocations
  *			goes from 0 -> 1
@@ -184,7 +173,6 @@ struct ion_cp_heap_pdata {
 struct ion_co_heap_pdata {
 	int adjacent_mem_id;
 	unsigned int align;
-	int mem_is_fmem;
 	enum ion_fixed_position fixed_position;
 	int (*request_region)(void *);
 	int (*release_region)(void *);
