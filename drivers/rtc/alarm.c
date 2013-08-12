@@ -248,6 +248,28 @@ int alarm_cancel(struct alarm *alarm)
 	}
 }
 
+//use to get rtc times for other driver
+int msmrtc_alarm_read_time(struct rtc_time *tm)
+{
+	int ret=0;
+
+	wake_lock(&alarm_rtc_wake_lock);
+	ret = rtc_read_time(alarm_rtc_dev, tm);
+	if (ret < 0) {
+		pr_alarm(ERROR, "%s: Failed to read RTC time\n", __func__);
+		goto err;
+	}
+
+	wake_unlock(&alarm_rtc_wake_lock);
+	return 0;
+
+err:
+	pr_alarm(ERROR, "%s: rtc alarm will lost!", __func__);
+	wake_unlock(&alarm_rtc_wake_lock);
+	return -1;
+}
+EXPORT_SYMBOL(msmrtc_alarm_read_time);
+
 /**
  * alarm_set_rtc - set the kernel and rtc walltime
  * @new_time:	timespec value containing the new time
