@@ -491,9 +491,10 @@ out:
 static inline int
 snd_compr_tstamp(struct snd_compr_stream *stream, unsigned long arg)
 {
-	struct snd_compr_tstamp tstamp = {0};
+	struct snd_compr_tstamp tstamp;
 	int ret;
 
+	memset(&tstamp, 0, sizeof(tstamp));
 	ret = snd_compr_update_tstamp(stream, &tstamp);
 	if (ret == 0)
 		ret = copy_to_user((struct snd_compr_tstamp __user *)arg,
