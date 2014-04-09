@@ -376,11 +376,7 @@ static int compare_for_sort(const void *lhs_ptr, const void *rhs_ptr)
 {
 	unsigned int lhs = *(const unsigned int *)(lhs_ptr);
 	unsigned int rhs = *(const unsigned int *)(rhs_ptr);
-	if (lhs < rhs)
-		return -1;
-	if (lhs > rhs)
-		return 1;
-	return 0;
+	return (lhs - rhs);
 }
 
 static bool check_all_freq_table(unsigned int freq)
