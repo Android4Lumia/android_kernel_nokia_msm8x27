@@ -401,33 +401,26 @@ config USE_USER_ACCESSIBLE_TIMERS
 	  architecture-specific code that will need to be enabled
 	  separately.
 
-config PROCESS_RECLAIM
-	bool "Enable process reclaim"
-	depends on PROC_FS
+
+config ZPOOL
+	tristate "Common API for compressed memory storage"
 	default n
 	help
-	 It allows to reclaim pages of the process by /proc/pid/reclaim.
+	  Compressed memory storage API.  This allows using either zbud or
+	  zsmalloc.
 
-	 (echo file > /proc/PID/reclaim) reclaims file-backed pages only.
-	 (echo anon > /proc/PID/reclaim) reclaims anonymous pages only.
-	 (echo all > /proc/PID/reclaim) reclaims all pages.
-
-	 (echo addr size-byte > /proc/PID/reclaim) reclaims pages in
-	 (addr, addr + size-bytes) of the process.
-
-	 Any other vaule is ignored.
-
-config BALANCE_ANON_FILE_RECLAIM
-	bool "During reclaim treat anon and file backed pages equally"
-	depends on SWAP
+config ZBUD
+	tristate "Low density storage for compressed pages"
+	default n
 	help
-	  When performing memory reclaim treat anonymous and file backed pages
-	  equally.
-	  Swapping anonymous pages out to memory can be efficient enough to justify
-	  treating anonymous and file backed pages equally.
+	  A special purpose allocator for storing compressed pages.
+	  It is designed to store up to two compressed pages per physical
+	  page.  While this design limits storage density, it has simple and
+	  deterministic reclaim properties that make it preferable to a higher
+	  density approach when reclaim will be used.
 
 config ZSMALLOC
-	bool "Memory allocator for compressed pages"
+	tristate "Memory allocator for compressed pages"
 	depends on MMU
 	default n
 	help
@@ -437,16 +430,6 @@ config ZSMALLOC
 	  non-standard allocator interface where a handle, not a pointer, is
 	  returned by an alloc().  This handle must be mapped in order to
 	  access the allocated space.
-
-config ZBUD
-	tristate
-	default n
-	help
-	  A special purpose allocator for storing compressed pages.
-	  It is designed to store up to two compressed pages per physical
-	  page.  While this design limits storage density, it has simple and
-	  deterministic reclaim properties that make it preferable to a higher
-	  density approach when reclaim will be used.
 
 config ZCACHE
        bool "Compressed cache for file pages (EXPERIMENTAL)"
@@ -463,3 +446,28 @@ config ZCACHE
          If this process is successful, when those file pages needed again, the
          I/O reading operation was avoided. This results in a significant performance
          gains under memory pressure for systems full with file pages.
+
+config BALANCE_ANON_FILE_RECLAIM
+	bool "During reclaim treat anon and file backed pages equally"
+	depends on SWAP
+	help
+	  When performing memory reclaim treat anonymous and file backed pages
+	  equally.
+	  Swapping anonymous pages out to memory can be efficient enough to justify
+	  treating anonymous and file backed pages equally.
+
+config PROCESS_RECLAIM
+	bool "Enable process reclaim"
+	depends on PROC_FS
+	default n
+	help
+	 It allows to reclaim pages of the process by /proc/pid/reclaim.
+
+	 (echo file > /proc/PID/reclaim) reclaims file-backed pages only.
+	 (echo anon > /proc/PID/reclaim) reclaims anonymous pages only.
+	 (echo all > /proc/PID/reclaim) reclaims all pages.
+
+	 (echo addr size-byte > /proc/PID/reclaim) reclaims pages in
+	 (addr, addr + size-bytes) of the process.
+
+	 Any other vaule is ignored.
