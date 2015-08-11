@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2013, 2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -231,11 +231,13 @@ static int wfd_flush_ion_buffer(struct ion_client *client,
 			ION_IOC_INV_CACHES);
 
 }
+
 int wfd_allocate_input_buffers(struct wfd_device *wfd_dev,
 			struct wfd_inst *inst)
 {
 	int i;
-	struct mem_region *enc_mregion, *mdp_mregion;
+	struct mem_region *enc_mregion = NULL,
+			*mdp_mregion = NULL;
 	struct mem_region_pair *mpair;
 	int rc;
 	unsigned long flags;
@@ -251,8 +253,23 @@ int wfd_allocate_input_buffers(struct wfd_device *wfd_dev,
 
 	for (i = 0; i < VENC_INPUT_BUFFERS; ++i) {
 		mpair = kzalloc(sizeof(*mpair), GFP_KERNEL);
+		if (!mpair) {
+			WFD_MSG_ERR("Failed to allocate memory pair\n");
+			rc = -ENOMEM;
+			goto recon_alloc_fail;
+		}
 		enc_mregion = kzalloc(sizeof(*enc_mregion), GFP_KERNEL);
+		if (!enc_mregion) {
+			WFD_MSG_ERR("Failed to allocate enc memory\n");
+			rc = -ENOMEM;
+			goto alloc_fail;
+		}
 		mdp_mregion = kzalloc(sizeof(*enc_mregion), GFP_KERNEL);
+		if (!mdp_mregion) {
+			WFD_MSG_ERR("Failed to allocate mdp memory\n");
+			rc = -ENOMEM;
+			goto alloc_fail;
+		}
 		enc_mregion->size = ALIGN(inst->input_buf_size, SZ_4K);
 
 		rc = wfd_allocate_ion_buffer(wfd_dev->ion_client,
@@ -384,6 +401,7 @@ alloc_fail:
 recon_alloc_fail:
 	return rc;
 }
+
 void wfd_free_input_buffers(struct wfd_device *wfd_dev,
 			struct wfd_inst *inst)
 {
@@ -403,6 +421,7 @@ void wfd_free_input_buffers(struct wfd_device *wfd_dev,
 				&inst->input_mem_list) {
 			mpair = list_entry(ptr, struct mem_region_pair,
 						list);
+
 			rc = v4l2_subdev_call(&wfd_dev->enc_sdev,
 					core, ioctl, FREE_INPUT_BUFFER,
 					(void *)mpair->enc);
@@ -453,7 +472,7 @@ struct mem_info *wfd_get_mem_info(struct wfd_inst *inst,
 	spin_lock_irqsave(&inst->inst_lock, flags);
 	if (!list_empty(&inst->minfo_list)) {
 		list_for_each_entry(temp, &inst->minfo_list, list) {
-			if (temp && temp->userptr == userptr) {
+			if (temp->userptr == userptr) {
 				ret = &temp->minfo;
 				break;
 			}
@@ -462,6 +481,7 @@ struct mem_info *wfd_get_mem_info(struct wfd_inst *inst,
 	spin_unlock_irqrestore(&inst->inst_lock, flags);
 	return ret;
 }
+
 void wfd_put_mem_info(struct wfd_inst *inst,
 			struct mem_info *minfo)
 {
@@ -474,7 +494,7 @@ void wfd_put_mem_info(struct wfd_inst *inst,
 				&inst->minfo_list) {
 			temp = list_entry(ptr, struct mem_info_entry,
 						list);
-			if (temp && (&temp->minfo == minfo)) {
+			if (&temp->minfo == minfo) {
 				list_del(&temp->list);
 				kfree(temp);
 			}
@@ -491,6 +511,7 @@ static void wfd_unregister_out_buf(struct wfd_inst *inst,
 	}
 	wfd_put_mem_info(inst, minfo);
 }
+
 int wfd_vidbuf_buf_init(struct vb2_buffer *vb)
 {
 	int rc = 0;
@@ -501,13 +522,22 @@ int wfd_vidbuf_buf_init(struct vb2_buffer *vb)
 		(struct wfd_device *)video_drvdata(priv_data);
 	struct mem_info *minfo = vb2_plane_cookie(vb, 0);
 	struct mem_region mregion;
+
+	if (!minfo) {
+		WFD_MSG_ERR("NULL mem info\n");
+		return -EINVAL;
+	}
 	mregion.fd = minfo->fd;
 	mregion.offset = minfo->offset;
 	mregion.cookie = (u32)vb;
 	/*TODO: should be fixed in kernel 3.2*/
-	mregion.size =  inst->out_buf_size;
+	if (!inst) {
+		WFD_MSG_ERR("NULL instance\n");
+		return -EINVAL;
+	}
+	mregion.size = inst->out_buf_size;
 
-	if (inst && !inst->vid_bufq.streaming) {
+	if (!inst->vid_bufq.streaming) {
 		rc = wfd_allocate_input_buffers(wfd_dev, inst);
 		if (rc) {
 			WFD_MSG_ERR("Failed to allocate input buffers\n");
@@ -651,6 +681,7 @@ int wfd_vidbuf_start_streaming(struct vb2_queue *q, unsigned int count)
 		WFD_MSG_ERR("Failed to start vsg\n");
 		goto subdev_start_fail;
 	}
+
 	init_completion(&inst->stop_mdp_thread);
 	inst->mdp_task = kthread_run(mdp_output_thread, priv_data,
 				"mdp_output_thread");
@@ -712,10 +743,15 @@ void wfd_vidbuf_buf_queue(struct vb2_buffer *vb)
 	struct wfd_inst *inst = (struct wfd_inst *)priv_data->private_data;
 	struct mem_region mregion;
 	struct mem_info *minfo = vb2_plane_cookie(vb, 0);
+
+	if (!minfo) {
+		WFD_MSG_ERR("NULL mem info\n");
+		return;
+	}
 	mregion.fd = minfo->fd;
 	mregion.offset = minfo->offset;
 	mregion.cookie = (u32)vb;
-	mregion.size =  inst->out_buf_size;
+	mregion.size = inst->out_buf_size;
 	rc = v4l2_subdev_call(&wfd_dev->enc_sdev, core, ioctl,
 			FILL_OUTPUT_BUFFER, (void *)&mregion);
 	if (rc) {
@@ -894,6 +930,10 @@ static int wfd_register_out_buf(struct wfd_inst *inst,
 	if (!minfo) {
 		minfo_entry = kzalloc(sizeof(struct mem_info_entry),
 				GFP_KERNEL);
+		if (!minfo_entry) {
+			WFD_MSG_ERR("No memory for mem info entry\n");
+			return -ENOMEM;
+		}
 		if (copy_from_user(&minfo_entry->minfo, (void *)b->reserved,
 					sizeof(struct mem_info))) {
 			WFD_MSG_ERR(" copy_from_user failed. Populate"
@@ -904,8 +944,9 @@ static int wfd_register_out_buf(struct wfd_inst *inst,
 		spin_lock_irqsave(&inst->inst_lock, flags);
 		list_add_tail(&minfo_entry->list, &inst->minfo_list);
 		spin_unlock_irqrestore(&inst->inst_lock, flags);
-	} else
+	} else {
 		WFD_MSG_DBG("Buffer already registered\n");
+	}
 
 	return 0;
 }
@@ -926,6 +967,7 @@ static int wfdioc_qbuf(struct file *filp, void *fh,
 	}
 
 	rc = vb2_qbuf(&inst->vid_bufq, b);
+
 	if (rc)
 		WFD_MSG_ERR("Failed to queue buffer\n");
 	else
@@ -992,6 +1034,7 @@ static int wfdioc_dqbuf(struct file *filp, void *fh,
 	int rc;
 
 	WFD_MSG_DBG("Waiting to dequeue buffer\n");
+
 	rc = vb2_dqbuf(&inst->vid_bufq, b, 0);
 
 	if (rc)
@@ -1017,8 +1060,10 @@ static int wfdioc_s_ctrl(struct file *filp, void *fh,
 {
 	int rc = 0;
 	struct wfd_device *wfd_dev = video_drvdata(filp);
+
 	rc = v4l2_subdev_call(&wfd_dev->enc_sdev, core,
 			ioctl, SET_PROP, a);
+
 	if (rc)
 		WFD_MSG_ERR("Failed to set encoder property\n");
 	return rc;
@@ -1086,7 +1131,8 @@ static int wfdioc_s_parm(struct file *filp, void *fh,
 	struct wfd_device *wfd_dev = video_drvdata(filp);
 	struct wfd_inst *inst = filp->private_data;
 	struct v4l2_qcom_frameskip frameskip;
-	int64_t frame_interval, max_frame_interval;
+	int64_t frame_interval = 0,
+		max_frame_interval = 0;
 	void *extendedmode = NULL;
 	enum vsg_modes vsg_mode = VSG_MODE_VFR;
 	enum venc_framerate_modes venc_mode = VENC_MODE_VFR;

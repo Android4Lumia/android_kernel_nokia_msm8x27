@@ -1,4 +1,4 @@
-/* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012, 2015, The Linux Foundation. All rights reserved.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2 and
@@ -131,6 +131,10 @@ static void vsg_work_func(struct work_struct *task)
 	}
 
 	encode_work = kmalloc(sizeof(*encode_work), GFP_KERNEL);
+	if (!encode_work) {
+		WFD_MSG_ERR("No memory for encode work\n");
+		goto err_skip_encode;
+	}
 	encode_work->buf = buf_info;
 	encode_work->context = context;
 	INIT_WORK(&encode_work->work, vsg_encode_helper_func);
@@ -272,6 +276,10 @@ static int vsg_open(struct v4l2_subdev *sd, void *arg)
 		return -EINVAL;
 
 	context = kzalloc(sizeof(*context), GFP_KERNEL);
+	if (!context) {
+		WFD_MSG_ERR("No memory for context\n");
+		return -ENOMEM;
+	}
 	INIT_LIST_HEAD(&context->free_queue.node);
 	INIT_LIST_HEAD(&context->busy_queue.node);
 
@@ -441,7 +449,11 @@ static long vsg_queue_buffer(struct v4l2_subdev *sd, void *arg)
 	if (push) {
 		struct vsg_work *new_work =
 			kzalloc(sizeof(*new_work), GFP_KERNEL);
-
+		if (!new_work) {
+			WFD_MSG_ERR("No memory for new work\n");
+			rc = -ENOMEM;
+			goto queue_err_bad_param;
+		}
 		INIT_WORK(&new_work->work, vsg_work_func);
 		new_work->context = context;
 		queue_work(context->work_queue, &new_work->work);
@@ -482,6 +494,7 @@ static long vsg_return_ip_buffer(struct v4l2_subdev *sd, void *arg)
 	if (!expected_buffer) {
 		WFD_MSG_ERR("Unexpectedly received buffer from enc with "
 			"paddr %p\n", (void *)buf_info->mdp_buf_info.paddr);
+		rc = -EBADHANDLE;
 		goto return_ip_buf_bad_buf;
 	}
 
