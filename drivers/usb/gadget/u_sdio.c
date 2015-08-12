@@ -5,7 +5,7 @@
  * Copyright (C) 2003 Al Borchers (alborchers@steinerpoint.com)
  * Copyright (C) 2008 David Brownell
  * Copyright (C) 2008 by Nokia Corporation
- * Copyright (c) 2011, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011,2015, The Linux Foundation. All rights reserved.
  *
  * This program from The Linux Foundation is free software; you can
  * redistribute it and/or modify it under the GNU General Public License
@@ -232,7 +232,7 @@ int gsdio_write(struct gsdio_port *port, struct usb_request *req)
 {
 	unsigned	avail;
 	char		*packet;
-	unsigned	size = req->actual;
+	unsigned	size;
 	unsigned	n;
 	int		ret = 0;
 
@@ -271,6 +271,7 @@ int gsdio_write(struct gsdio_port *port, struct usb_request *req)
 		return -ENODEV;
 	}
 
+	size = req->actual;
 	packet = req->buf;
 	n = port->n_read;
 	if (n) {
