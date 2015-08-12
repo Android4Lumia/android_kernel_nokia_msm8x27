@@ -921,6 +921,11 @@ int acm_bind_config(struct usb_configuration *c, u8 port_num)
 	if (!can_support_cdc(c))
 		return -EINVAL;
 
+	if (port_num >= GSERIAL_NO_PORTS) {
+		pr_err("Illegal port number.\n");
+		return -EINVAL;
+	}
+
 	/* REVISIT might want instance-specific strings to help
 	 * distinguish instances ...
 	 */
