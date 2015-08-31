@@ -757,9 +757,23 @@ static int msm_camera_v4l2_subscribe_event(struct v4l2_fh *fh,
 {
 	int rc = 0;
 	struct msm_cam_v4l2_dev_inst *pcam_inst;
+
+	if (!fh || !sub) {
+		pr_err("%s: NULL pointer fh 0x%p sub 0x%p",
+			__func__, fh, sub);
+		return -EINVAL;
+	}
+
 	pcam_inst =
 		(struct msm_cam_v4l2_dev_inst *)container_of(fh,
 		struct msm_cam_v4l2_dev_inst, eventHandle);
+
+	if (!pcam_inst) {
+		pr_err("%s: NULL pointer pcam_inst",
+			__func__);
+		return -EINVAL;
+	}
+
 
 	D("%s:fh = 0x%x, type = 0x%x\n", __func__, (u32)fh, sub->type);
 	if (pcam_inst->my_index != 0)
@@ -778,9 +792,22 @@ static int msm_camera_v4l2_unsubscribe_event(struct v4l2_fh *fh,
 {
 	int rc = 0;
 	struct msm_cam_v4l2_dev_inst *pcam_inst;
+
+	if (!fh || !sub) {
+		pr_err("%s: NULL pointer fh 0x%p sub 0x%p",
+			__func__, fh, sub);
+		return -EINVAL;
+	}
+
 	pcam_inst =
 		(struct msm_cam_v4l2_dev_inst *)container_of(fh,
 		struct msm_cam_v4l2_dev_inst, eventHandle);
+
+	if (!pcam_inst) {
+		pr_err("%s: NULL pointer pcam_inst",
+			__func__);
+		return -EINVAL;
+	}
 
 	D("%s: fh = 0x%x\n", __func__, (u32)fh);
 	if (pcam_inst->my_index != 0)
