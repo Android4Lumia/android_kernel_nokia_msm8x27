@@ -869,9 +869,9 @@ int msm_mctl_buf_done_pp(struct msm_cam_media_controller *pmctl,
 
 	if (buf_handle->buf_lookup_type == BUF_LOOKUP_BY_INST_HANDLE) {
 		idx = GET_MCTLPP_INST_IDX(buf_handle->inst_handle);
-		if (idx > MSM_DEV_INST_MAX) {
+		if (idx >= MSM_DEV_INST_MAX) {
 			idx = GET_VIDEO_INST_IDX(buf_handle->inst_handle);
-			BUG_ON(idx > MSM_DEV_INST_MAX);
+			BUG_ON(idx >= MSM_DEV_INST_MAX);
 			pcam_inst = pmctl->pcam_ptr->dev_inst[idx];
 		} else {
 			pcam_inst = pmctl->pcam_ptr->mctl_node.dev_inst[idx];
