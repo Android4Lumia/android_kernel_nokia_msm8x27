@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2013, 2015 The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -517,7 +517,7 @@ int msm_mctl_pp_reserve_free_frame(
 	}
 
 	image_mode = div_frame.image_mode;
-	if (image_mode <= 0) {
+	if (image_mode < 0  || image_mode >= MSM_MAX_IMG_MODE) {
 		pr_err("%s Invalid image mode %d", __func__, image_mode);
 		return -EINVAL;
 	}
@@ -570,7 +570,7 @@ int msm_mctl_pp_release_free_frame(
 	}
 
 	image_mode = div_frame.image_mode;
-	if (image_mode < 0) {
+	if (image_mode < 0 || image_mode >= MSM_MAX_IMG_MODE) {
 		pr_err("%s Invalid image mode %d\n", __func__, image_mode);
 		return -EINVAL;
 	}
