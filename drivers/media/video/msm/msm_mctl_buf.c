@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2013, 2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -1011,6 +1011,8 @@ static int __msm_mctl_map_user_frame(struct msm_cam_meta_frame *meta_frame,
 
 		/* Validate the offsets with the mapped length. */
 		if ((meta_frame->frame.mp[i].addr_offset > len) ||
+			(meta_frame->frame.mp[i].data_offset > UINT_MAX -
+			meta_frame->frame.mp[i].length) ||
 			(meta_frame->frame.mp[i].data_offset +
 			meta_frame->frame.mp[i].length > len)) {
 			pr_err("%s: Invalid offsets A %d D %d L %d len %ld",
