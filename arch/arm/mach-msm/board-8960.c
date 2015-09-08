@@ -770,9 +770,12 @@ static void __init reserve_ion_memory(void)
 						0xa0000000);
 					WARN_ON(ret);
 				}
-				pdata->secure_base = fixed_middle_start
-							- HOLE_SIZE;
-				pdata->secure_size = HOLE_SIZE + heap->size;
+				if (pdata) {
+					pdata->secure_base = fixed_middle_start
+								- HOLE_SIZE;
+					pdata->secure_size = HOLE_SIZE
+								+ heap->size;
+				}
 				break;
 			case FIXED_HIGH:
 				heap->base = fixed_high_start;

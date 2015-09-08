@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -151,7 +151,8 @@ msm_buspm_dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 
 	case MSM_BUSPM_IOC_RDBUF:
-		pr_debug("Read Buffer: 0x%x%x%x%x\n",
+		if (dbgbuf)
+			pr_debug("Read Buffer: 0x%x%x%x%x\n",
 				dbgbuf[0], dbgbuf[1], dbgbuf[2], dbgbuf[3]);
 
 		if (!buf) {

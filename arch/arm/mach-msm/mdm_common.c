@@ -690,7 +690,7 @@ static int mdm_panic_prep(struct notifier_block *this,
 	for (i = MDM_MODEM_TIMEOUT; i > 0; i -= MDM_MODEM_DELTA) {
 		pet_watchdog();
 		mdelay(MDM_MODEM_DELTA);
-		if (gpio_get_value(mdm_drv->mdm2ap_status_gpio) == 0)
+		if (mdm_drv && gpio_get_value(mdm_drv->mdm2ap_status_gpio) == 0)
 			break;
 	}
 	if (i <= 0) {

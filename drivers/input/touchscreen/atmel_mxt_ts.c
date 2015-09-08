@@ -1643,6 +1643,9 @@ static int mxt_load_fw(struct device *dev, const char *fn)
 		mxt_unlock_bootloader(client);
 	}
 
+	if (fw == NULL)
+		goto return_to_app_mode;
+
 	while (pos < fw->size) {
 		ret = mxt_check_bootloader(client,
 						MXT_WAITING_FRAME_DATA);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -123,8 +123,9 @@ static void riva_post_bootup(struct work_struct *work)
 
 	pr_debug(MODULE_NAME ": Cancel APPS vote for Iris & Riva\n");
 
-	wcnss_wlan_power(&pdev->dev, pwlanconfig,
-		WCNSS_WLAN_SWITCH_OFF);
+	if (pwlanconfig != NULL)
+		wcnss_wlan_power(&pdev->dev, pwlanconfig,
+			WCNSS_WLAN_SWITCH_OFF);
 }
 
 /* Subsystem handlers */

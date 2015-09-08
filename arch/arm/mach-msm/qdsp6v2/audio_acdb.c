@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -234,8 +234,13 @@ int get_hw_delay(int32_t path, struct hw_delay_entry *entry)
 done:
 	mutex_unlock(&acdb_data.acdb_mutex);
 ret:
-	pr_err("ACDB=> %s: Path = %d samplerate = %u usec = %u status %d\n",
-		 __func__, path, entry->sample_rate, entry->delay_usec, result);
+	if (entry)
+		pr_err("ACDB=>%s: Path=%d samplerate=%u usec=%u status %d\n",
+			__func__, path, entry->sample_rate,
+			entry->delay_usec, result);
+	else
+		pr_err("ACDB=> %s: Path=%d entry=%p status %d\n",
+			__func__, path, entry, result);
 	return result;
 }
 

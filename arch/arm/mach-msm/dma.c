@@ -341,7 +341,7 @@ static void msm_dmov_enqueue_cmd_ext_work(struct work_struct *work)
 		 * We added something to the ready list, and still hold the
 		 * list lock. Thus, no need to check for cmd == NULL
 		 */
-		if (cmd->toflush) {
+		if (cmd && cmd->toflush) {
 			int flush = (cmd->toflush == GRACEFUL) ? 1 << 31 : 0;
 			writel_relaxed(flush, DMOV_REG(DMOV_FLUSH0(ch), adm));
 		}

@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -57,7 +57,7 @@ multicore_free_irq(int irq)
 	int cpu;
 	struct irq_desc *desc = irq_to_desc(irq);
 
-	if (irq >= 0) {
+	if (desc && irq >= 0) {
 		for_each_cpu(cpu, desc->percpu_enabled) {
 			if (!armpmu_cpu_up(cpu))
 				smp_call_function_single(cpu,
