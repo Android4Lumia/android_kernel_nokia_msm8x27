@@ -280,10 +280,11 @@ static int check_overlap(struct hlist_head *ptype,
 static int check_pmem_info(struct msm_pmem_info *info, int len)
 {
 	if (info->offset < len &&
-	    info->offset + info->len <= len &&
-	    info->planar0_off < len &&
-	    info->planar1_off < len &&
-	    info->planar2_off < len)
+		info->offset <= (UINT_MAX - info->len) &&
+		info->offset + info->len <= len &&
+		info->planar0_off < len &&
+		info->planar1_off < len &&
+		info->planar2_off < len)
 		return 0;
 
 	pr_err("%s: check failed: off %d len %d y 0x%x cbcr_p1 0x%x p2_add 0x%x(total len %d)\n",
