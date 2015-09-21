@@ -315,6 +315,12 @@ int32_t msm_sensor_set_sensor_mode(struct msm_sensor_ctrl_t *s_ctrl,
 	int mode, int res)
 {
 	int32_t rc = 0;
+
+	if (res < 0 || res >= s_ctrl->msm_sensor_reg->num_conf) {
+		pr_err("%s: invalid res %d", __func__, res);
+		return -EINVAL;
+	}
+
 	if (s_ctrl->curr_res != res) {
 		s_ctrl->curr_frame_length_lines =
 			s_ctrl->msm_sensor_reg->
