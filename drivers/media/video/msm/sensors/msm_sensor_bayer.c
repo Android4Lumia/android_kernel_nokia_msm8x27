@@ -307,6 +307,15 @@ int32_t msm_sensor_bayer_config(struct msm_sensor_ctrl_t *s_ctrl,
 			break;
 		}
 
+		if (clk_setting.num_clk_info >
+			ARRAY_SIZE(s_ctrl->cam_clk)) {
+			pr_err("%s:%d num_clk_info %d exceeds maximum",
+					__func__, __LINE__,
+					clk_setting.num_clk_info);
+			rc = -EINVAL;
+			break;
+		}
+
 		clk_info = kzalloc(clk_setting.num_clk_info * sizeof(
 			struct msm_cam_clk_info),
 			GFP_KERNEL);
