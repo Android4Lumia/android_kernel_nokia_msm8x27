@@ -154,16 +154,24 @@ static int msm_vpe_cfg_update(void *pinfo)
 	return rc;
 }
 
-void vpe_update_scale_coef(uint32_t *p)
+int vpe_update_scale_coef(uint32_t *p)
 {
 	uint32_t i, offset;
 	offset = *p;
+
+	if (offset > VPE_SCALE_COEFF_MAX_N-VPE_SCALE_COEFF_NUM) {
+		pr_err("%s: invalid offset %d passed in", __func__, offset);
+		return -EINVAL;
+	}
+
 	for (i = offset; i < (VPE_SCALE_COEFF_NUM + offset); i++) {
 		msm_camera_io_w(*(++p),
 			vpe_ctrl->vpebase + VPE_SCALE_COEFF_LSBn(i));
 		msm_camera_io_w(*(++p),
 			vpe_ctrl->vpebase + VPE_SCALE_COEFF_MSBn(i));
 	}
+
+	return 0;
 }
 
 void vpe_input_plane_config(uint32_t *p)
@@ -791,8 +799,7 @@ static int msm_vpe_process_vpe_cmd(struct msm_vpe_cfg_cmd *vpe_cmd,
 			break;
 		}
 
-		vpe_cmd->value = (void *)&scaler_cfg;
-		vpe_update_scale_coef(vpe_cmd->value);
+		rc = vpe_update_scale_coef((uint32_t *)scaler_cfg.scaler_cfg);
 		break;
 		}
 

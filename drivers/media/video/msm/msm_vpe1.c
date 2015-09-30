@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2012, 2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -200,16 +200,24 @@ int msm_vpe_cfg_update(void *pinfo)
 	return rc;
 }
 
-void vpe_update_scale_coef(uint32_t *p)
+int vpe_update_scale_coef(uint32_t *p)
 {
 	uint32_t i, offset;
 	offset = *p;
+
+	if (offset > VPE_SCALE_COEFF_MAX_N-VPE_SCALE_COEFF_NUM) {
+		pr_err("%s: invalid offset %d passed in", __func__, offset);
+		return -EINVAL;
+	}
+
 	for (i = offset; i < (VPE_SCALE_COEFF_NUM + offset); i++) {
 		msm_camera_io_w(*(++p),
 			vpe_device->vpebase + VPE_SCALE_COEFF_LSBn(i));
 		msm_camera_io_w(*(++p),
 			vpe_device->vpebase + VPE_SCALE_COEFF_MSBn(i));
 	}
+
+	return 0;
 }
 
 void vpe_input_plane_config(uint32_t *p)
@@ -871,7 +879,7 @@ static int vpe_proc_general(struct msm_vpe_cmd *cmd)
 			rc = -EFAULT;
 			goto vpe_proc_general_done;
 		}
-		vpe_update_scale_coef(cmdp);
+		rc = vpe_update_scale_coef(cmdp);
 		break;
 
 	case VPE_CMD_DIS_OFFSET_CFG: {
