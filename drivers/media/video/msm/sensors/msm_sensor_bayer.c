@@ -251,7 +251,7 @@ int32_t msm_sensor_bayer_config(struct msm_sensor_ctrl_t *s_ctrl,
 		cam_vreg = kzalloc(vreg_setting.num_vreg * sizeof(
 			struct camera_vreg_t),
 			GFP_KERNEL);
-		if (!cam_vreg) {
+		if (ZERO_OR_NULL_PTR(cam_vreg)) {
 			pr_err("%s:%d failed\n", __func__, __LINE__);
 			rc = -EFAULT;
 			break;
