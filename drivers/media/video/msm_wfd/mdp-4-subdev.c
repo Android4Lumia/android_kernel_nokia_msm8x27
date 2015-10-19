@@ -169,11 +169,12 @@ int mdp_dq_buffer(struct v4l2_subdev *sd, void *arg)
 int mdp_set_prop(struct v4l2_subdev *sd, void *arg)
 {
 	struct mdp_prop *prop = (struct mdp_prop *)arg;
-	struct mdp_instance *inst = prop->inst;
-	if (!prop || !inst) {
+	struct mdp_instance *inst = NULL;
+	if (!prop || !prop->inst) {
 		WFD_MSG_ERR("Invalid arguments\n");
 		return -EINVAL;
 	}
+	inst = prop->inst;
 	inst->height = prop->height;
 	inst->width = prop->width;
 	return 0;
