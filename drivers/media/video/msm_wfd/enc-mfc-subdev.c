@@ -236,9 +236,11 @@ static void venc_cb(u32 event, u32 status, void *info, u32 size, void *handle,
 			else
 				WFD_MSG_ERR("Got an output buffer that we " \
 						"couldn't recognize!\n");
-
-			if (msm_ion_do_cache_op(client_ctx->user_ion_client,
-				ion_handle, &kvaddr, frame_data->data_len,
+			if (!ion_handle)
+				WFD_MSG_ERR("Invalid ion handle\n");
+			else if (msm_ion_do_cache_op(
+				client_ctx->user_ion_client, ion_handle,
+				&kvaddr, frame_data->data_len,
 				ION_IOC_CLEAN_INV_CACHES))
 				WFD_MSG_ERR("OP buffer flush failed\n");
 
