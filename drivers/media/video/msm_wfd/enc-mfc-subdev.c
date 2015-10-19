@@ -218,7 +218,7 @@ static void venc_cb(u32 event, u32 status, void *info, u32 size, void *handle,
 		{
 			unsigned long kvaddr, phys_addr;
 			s32 buffer_index = -1, ion_flags = 0;
-			struct ion_handle *ion_handle;
+			struct ion_handle *ion_handle = NULL;
 			int pmem_fd;
 			struct file *filp;
 			bool rc;
