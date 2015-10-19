@@ -1999,6 +1999,10 @@ static long venc_fill_outbuf(struct v4l2_subdev *sd, void *arg)
 			WFD_MSG_ERR("Failed to fill output buffer on encoder");
 	} else {
 		struct mem_region *temp = kzalloc(sizeof(*temp), GFP_KERNEL);
+		if (!temp) {
+			rc = -ENOMEM;
+			goto err;
+		}
 		*temp = *mregion;
 		INIT_LIST_HEAD(&temp->list);
 		list_add_tail(&temp->list, &inst->unqueued_op_bufs.list);
