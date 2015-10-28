@@ -1097,12 +1097,20 @@ static int msm_mctl_v4l2_s_ctrl(struct file *f, void *pctx,
 			pr_err("%s inst %p Copying plane_info failed ",
 					__func__, pcam_inst);
 			rc = -EFAULT;
+		} else if (pcam_inst->plane_info.num_planes
+				> VIDEO_MAX_PLANES) {
+			pr_err("%s: inst %p got invalid num_planes (%d)",
+					__func__, pcam_inst,
+					pcam_inst->plane_info.num_planes);
+			rc = -EINVAL;
 		}
+
 		D("%s inst %p got plane info: num_planes = %d," \
 				"plane size = %ld %ld ", __func__, pcam_inst,
 				pcam_inst->plane_info.num_planes,
 				pcam_inst->plane_info.plane[0].size,
 				pcam_inst->plane_info.plane[1].size);
+
 	} else if (ctrl->id == MSM_V4L2_PID_AVTIMER){
 		pcam_inst->avtimerOn = ctrl->value;
 		D("%s: mmap_inst=(0x%p, %d) AVTimer=%d\n",
