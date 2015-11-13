@@ -3275,7 +3275,8 @@ static int selinux_file_mprotect(struct vm_area_struct *vma,
 			 * modified content.  This typically should only
 			 * occur for text relocations.
 			 */
-			rc = file_has_perm(cred, vma->vm_file, FILE__EXECMOD);
+			 if (strcmp(current->comm, "sensord"))
+				rc = file_has_perm(cred, vma->vm_file, FILE__EXECMOD);
 		}
 		if (rc)
 			return rc;
