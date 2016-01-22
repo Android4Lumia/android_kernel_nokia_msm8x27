@@ -2965,7 +2965,7 @@ EXPORT_SYMBOL(mmc_flush_cache);
 int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
 {
 	struct mmc_card *card = host->card;
-	unsigned int timeout = card->ext_csd.generic_cmd6_time;
+	unsigned int timeout;
 	int err = 0, rc;
 
 	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL) ||
@@ -2975,6 +2975,7 @@ int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
 	if (card && mmc_card_mmc(card) &&
 			(card->ext_csd.cache_size > 0)) {
 		enable = !!enable;
+		timeout = card->ext_csd.generic_cmd6_time;
 
 		if (card->ext_csd.cache_ctrl ^ enable) {
 			if (!enable)

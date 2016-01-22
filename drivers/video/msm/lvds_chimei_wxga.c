@@ -1,4 +1,5 @@
 /* Copyright (c) 2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -78,8 +79,9 @@ static int __devinit lvds_chimei_probe(struct platform_device *pdev)
 		pr_err("%s pwm_request() failed\n", __func__);
 		bl_lpm = NULL;
 	}
-	pr_debug("bl_lpm = %p lpm = %d\n", bl_lpm,
-		cm_pdata->gpio[0]);
+	if (cm_pdata != NULL)
+		pr_debug("bl_lpm = %p lpm = %d\n", bl_lpm,
+			cm_pdata->gpio[0]);
 
 	cm_fbpdev = msm_fb_add_device(pdev);
 	if (!cm_fbpdev) {

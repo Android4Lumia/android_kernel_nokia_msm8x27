@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -509,7 +509,7 @@ void mdp4_writeback_overlay(struct msm_fb_data_type *mfd)
 	struct vsycn_ctrl *vctrl;
 	struct mdp4_overlay_pipe *pipe;
 
-	if (mfd && !mfd->panel_power_on)
+	if (!mfd || !mfd->panel_power_on)
 		return;
 
 	pr_debug("%s:+ mfd=%x\n", __func__, (int)mfd);
@@ -553,7 +553,7 @@ static struct msmfb_writeback_data_list *get_if_registered(
 		list_for_each_entry(temp,
 				&mfd->writeback_register_queue,
 				registered_entry) {
-			if (temp && temp->buf_info.iova == data->iova) {
+			if (temp->buf_info.iova == data->iova) {
 				found = true;
 				break;
 			}
@@ -830,7 +830,7 @@ static int mdp4_wfd_dequeue_update(struct msm_fb_data_type *mfd,
 	struct mdp4_overlay_pipe *pipe;
 	struct msmfb_writeback_data_list *node = NULL;
 
-	if (mfd && !mfd->panel_power_on)
+	if (!mfd || !mfd->panel_power_on)
 		return -EPERM;
 
 	pr_debug("%s:+ mfd=%x\n", __func__, (int)mfd);
@@ -884,7 +884,7 @@ static void mdp4_wfd_queue_wakeup(struct msm_fb_data_type *mfd,
 			struct msmfb_writeback_data_list *node)
 {
 
-	if (mfd && !mfd->panel_power_on)
+	if (!mfd || !mfd->panel_power_on)
 		return;
 
 	if (node == NULL)
