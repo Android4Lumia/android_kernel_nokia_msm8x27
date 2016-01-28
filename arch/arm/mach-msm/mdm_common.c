@@ -1,4 +1,4 @@
-/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2011-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -1073,7 +1073,7 @@ static int mdm_configure_ipc(struct mdm_device *mdev)
 	gpio_direction_output(mdm_drv->ap2mdm_status_gpio, 0);
 	gpio_direction_output(mdm_drv->ap2mdm_errfatal_gpio, 0);
 
-	if (GPIO_IS_VALID(mdm_drv->ap2mdm_wakeup_gpio))
+	if (gpio_is_valid(mdm_drv->ap2mdm_wakeup_gpio))
 		gpio_direction_output(mdm_drv->ap2mdm_wakeup_gpio, 0);
 
 	gpio_direction_input(mdm_drv->mdm2ap_status_gpio);
@@ -1172,7 +1172,7 @@ pblrdy_err:
 	 * If AP2MDM_PMIC_PWR_EN gpio is used, pull it high. It remains
 	 * high until the whole phone is shut down.
 	 */
-	if (GPIO_IS_VALID(mdm_drv->ap2mdm_pmic_pwr_en_gpio))
+	if (gpio_is_valid(mdm_drv->ap2mdm_pmic_pwr_en_gpio))
 		gpio_direction_output(mdm_drv->ap2mdm_pmic_pwr_en_gpio, 1);
 
 	return 0;
@@ -1263,7 +1263,7 @@ static void mdm_modem_shutdown(struct platform_device *pdev)
 	mdm_disable_irqs(mdev);
 	mdm_drv = &mdev->mdm_data;
 	mdm_ops->power_down_mdm_cb(mdm_drv);
-	if (GPIO_IS_VALID(mdm_drv->ap2mdm_pmic_pwr_en_gpio))
+	if (gpio_is_valid(mdm_drv->ap2mdm_pmic_pwr_en_gpio))
 		gpio_direction_output(mdm_drv->ap2mdm_pmic_pwr_en_gpio, 0);
 }
 

@@ -422,6 +422,7 @@ static int msm_l2_test_set_ev_constraint(struct perf_event *event)
 	u32 err = 0;
 	u64 bitmap_t;
 	u32 shift_idx;
+	const short code_sz = ARRAY_SIZE(l2_pmu_constraints.codes);
 
 	if (evt_prefix == L2_TRACECTR_PREFIX)
 		return err;
@@ -440,14 +441,16 @@ static int msm_l2_test_set_ev_constraint(struct perf_event *event)
 
 	if (!(l2_pmu_constraints.pmu_bitmap & bitmap_t)) {
 		l2_pmu_constraints.pmu_bitmap |= bitmap_t;
-		l2_pmu_constraints.codes[shift_idx] = code;
+		if (shift_idx < code_sz)
+			l2_pmu_constraints.codes[shift_idx] = code;
 		goto out;
 	} else {
 		/*
 		 * If NRCCG's are identical,
 		 * its not column exclusion.
 		 */
-		if (l2_pmu_constraints.codes[shift_idx] != code)
+		if (shift_idx < code_sz &&
+			l2_pmu_constraints.codes[shift_idx] != code)
 			err = -EPERM;
 		else
 			/*
@@ -489,7 +492,8 @@ static int msm_l2_clear_ev_constraint(struct perf_event *event)
 	l2_pmu_constraints.pmu_bitmap &= ~bitmap_t;
 
 	/* Clear code. */
-	l2_pmu_constraints.codes[shift_idx] = -1;
+	if (shift_idx < ARRAY_SIZE(l2_pmu_constraints.codes))
+		l2_pmu_constraints.codes[shift_idx] = -1;
 
 	raw_spin_unlock_irqrestore(&l2_pmu_constraints.lock, flags);
 	return 1;
