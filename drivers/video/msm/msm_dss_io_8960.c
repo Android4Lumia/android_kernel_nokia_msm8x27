@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2014, 2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -578,6 +578,10 @@ void mipi_dsi_phy_init(int panel_ndx, struct msm_panel_info const *panel_info,
 
 	MIPI_OUTP(MIPI_DSI_BASE + 0x4b0, 0x05);/* DSIPHY_LDO_CNTRL */
 
+	if (!panel_info) {
+		pr_err("%s: panel_info is NULL", __func__);
+		return;
+	}
 	pd = (panel_info->mipi).dsi_phy_db;
 
 	off = 0x0480;	/* strength 0 - 2 */

@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2009-2013, 2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -2811,6 +2811,10 @@ static int __devinit msm_rotator_probe(struct platform_device *pdev)
 	msm_rotator_dev->last_session_idx = INVALID_SESSION;
 
 	pdata = pdev->dev.platform_data;
+	if (!pdata) {
+		pr_err("%s: No device\n", __func__);
+		return -ENODEV;
+	}
 	number_of_clks = pdata->number_of_clocks;
 	rot_iommu_split_domain = pdata->rot_iommu_split_domain;
 
@@ -2826,13 +2830,23 @@ static int __devinit msm_rotator_probe(struct platform_device *pdev)
 	msm_rotator_dev->core_clk = NULL;
 	msm_rotator_dev->pclk = NULL;
 
-	mrd->y_rot_buf = kmalloc(sizeof(struct rot_buf_type), GFP_KERNEL);
-	mrd->chroma_rot_buf = kmalloc(sizeof(struct rot_buf_type), GFP_KERNEL);
-	mrd->chroma2_rot_buf = kmalloc(sizeof(struct rot_buf_type), GFP_KERNEL);
-
-	memset((void *)mrd->y_rot_buf, 0, sizeof(struct rot_buf_type));
-	memset((void *)mrd->chroma_rot_buf, 0, sizeof(struct rot_buf_type));
-	memset((void *)mrd->chroma2_rot_buf, 0, sizeof(struct rot_buf_type));
+	mrd->y_rot_buf = kzalloc(sizeof(struct rot_buf_type), GFP_KERNEL);
+	if (!mrd->y_rot_buf)
+		return -ENOMEM;
+	mrd->chroma_rot_buf = kzalloc(sizeof(struct rot_buf_type), GFP_KERNEL);
+	if (!mrd->chroma_rot_buf) {
+		kfree(mrd->y_rot_buf);
+		mrd->y_rot_buf = NULL;
+		return -ENOMEM;
+	}
+	mrd->chroma2_rot_buf = kzalloc(sizeof(struct rot_buf_type), GFP_KERNEL);
+	if (!mrd->chroma2_rot_buf) {
+		kfree(mrd->y_rot_buf);
+		kfree(mrd->chroma_rot_buf);
+		mrd->y_rot_buf = NULL;
+		mrd->chroma_rot_buf = NULL;
+		return -ENOMEM;
+	}
 
 #ifdef CONFIG_MSM_BUS_SCALING
 	if (!msm_rotator_dev->bus_client_handle && pdata &&
