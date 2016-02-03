@@ -6709,7 +6709,7 @@ static int nl80211_vendor_cmd(struct sk_buff *skb, struct genl_info *info)
 		if (err != -EINVAL)
 			return err;
 		wdev = NULL;
-	} else if (wdev->wiphy != &rdev->wiphy) {
+	} else if (!wdev || wdev->wiphy != &rdev->wiphy) {
 		return -EINVAL;
 	}
 
