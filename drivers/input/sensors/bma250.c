@@ -328,6 +328,7 @@ static void bma250_read_accel_xyz(struct bma250_data *bma250)
     unsigned char buf[6];
     s16 raw[3], data[3];
     int i, j;
+    ktime_t timestamp;
 
     if (bma250_smbus_read_byte_block(bma250->client, BMA250_X_AXIS_LSB_REG, buf, sizeof(buf)) < 0)
     {
@@ -363,10 +364,15 @@ static void bma250_read_accel_xyz(struct bma250_data *bma250)
 		TOUCH_ESD_WORKAROUND(CY_FACE_UP);
 #endif
 /*FIH-MTD-PERIPHERAL-CH-ESD-00++]*/
-		
+
+    timestamp = ktime_get_boottime();
     input_report_abs(bma250->input, ABS_X, bma250->value.x);
     input_report_abs(bma250->input, ABS_Y, bma250->value.y);
     input_report_abs(bma250->input, ABS_Z, bma250->value.z);
+    input_event(bma250->input, EV_SYN, SYN_TIME_SEC,
+		    ktime_to_timespec(timestamp).tv_sec);
+    input_event(bma250->input, EV_SYN, SYN_TIME_NSEC,
+		    ktime_to_timespec(timestamp).tv_nsec);
     input_sync(bma250->input);
 }
 
