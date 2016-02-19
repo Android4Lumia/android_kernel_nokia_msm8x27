@@ -3090,7 +3090,13 @@ static int mdp_probe(struct platform_device *pdev)
 	mfd->vsync_init = NULL;
 
 	mfd->ov0_wb_buf = MDP_ALLOC(sizeof(struct mdp_buf_type));
+	if (!mfd->ov0_wb_buf)
+		return -ENOMEM;
+
 	mfd->ov1_wb_buf = MDP_ALLOC(sizeof(struct mdp_buf_type));
+	if (!mfd->ov1_wb_buf)
+		return -ENOMEM;
+
 	memset((void *)mfd->ov0_wb_buf, 0, sizeof(struct mdp_buf_type));
 	memset((void *)mfd->ov1_wb_buf, 0, sizeof(struct mdp_buf_type));
 

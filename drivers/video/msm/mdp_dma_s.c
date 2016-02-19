@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2009, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2009, 2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -135,8 +135,11 @@ static void mdp_dma_s_update_lcd(struct msm_fb_data_type *mfd)
 
 void mdp_dma_s_update(struct msm_fb_data_type *mfd)
 {
+	if (!mfd || !mfd->dma)
+		return;
+
 	down(&mfd->dma->mutex);
-	if ((mfd) && (!mfd->dma->busy) && (mfd->panel_power_on)) {
+	if (!mfd->dma->busy && mfd->panel_power_on) {
 		down(&mfd->sem);
 		mdp_enable_irq(MDP_DMA_S_TERM);
 		if (mfd->panel_info.type == MDDI_PANEL)

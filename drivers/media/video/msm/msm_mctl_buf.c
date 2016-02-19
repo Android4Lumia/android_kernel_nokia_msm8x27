@@ -361,6 +361,7 @@ int msm_mctl_img_mode_to_inst_index(struct msm_cam_media_controller *pmctl,
 		return pmctl->pcam_ptr->
 				mctl_node.dev_inst_map[image_mode]->my_index;
 	else if ((image_mode >= 0) &&
+		image_mode < ARRAY_SIZE(pmctl->pcam_ptr->dev_inst_map) &&
 		pmctl->pcam_ptr->dev_inst_map[image_mode])
 		return	pmctl->pcam_ptr->
 				dev_inst_map[image_mode]->my_index;

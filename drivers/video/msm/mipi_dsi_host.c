@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2008-2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2013, 2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -1231,6 +1231,9 @@ int mipi_dsi_cmds_single_tx(struct dsi_buf *tp, struct dsi_cmd_desc *cmds,
 
 	cm = cmds;
 	cmds_tx = kmalloc((DSI_BUF_SIZE + DSI_HOST_HDR_SIZE) * cnt, GFP_KERNEL);
+	if (cmds_tx == NULL)
+		return -ENOMEM;
+
 	mipi_dsi_buf_init(tp);
 	mipi_dsi_enable_irq(DSI_CMD_TERM);
 	for (i = 0; i < cnt; i++) {

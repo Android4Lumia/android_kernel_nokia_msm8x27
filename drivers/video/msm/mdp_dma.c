@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2012, 2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -481,10 +481,12 @@ static void mdp_dma2_update_sub(struct msm_fb_data_type *mfd)
 void mdp_dma2_update(struct msm_fb_data_type *mfd)
 #endif
 {
-	unsigned long flag;
+	if (!mfd || !mfd->dma)
+		return;
 
 	down(&mfd->dma->mutex);
-	if ((mfd) && (!mfd->dma->busy) && (mfd->panel_power_on)) {
+	if (!mfd->dma->busy && mfd->panel_power_on) {
+		unsigned long flag;
 		down(&mfd->sem);
 		mfd->ibuf_flushed = TRUE;
 		mdp_dma2_update_lcd(mfd);
@@ -503,7 +505,7 @@ void mdp_dma2_update(struct msm_fb_data_type *mfd)
 		wait_for_completion_killable(&mfd->dma->comp);
 		mdp_disable_irq(MDP_DMA2_TERM);
 
-	/* signal if pan function is waiting for the update completion */
+		/* signal if pan function is waiting for update completion */
 		if (mfd->pan_waiting) {
 			mfd->pan_waiting = FALSE;
 			complete(&mfd->pan_comp);
