@@ -2,7 +2,7 @@
 
 /*Qualcomm Secure Execution Environment Communicator (QSEECOM) driver
  *
- * Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -277,7 +277,7 @@ static struct qseecom_registered_listener_list *__qseecom_find_svc(
 	}
 	spin_unlock_irqrestore(&qseecom.registered_listener_list_lock, flags);
 
-	if ((entry != NULL) && (entry->svc.listener_id != listener_id)) {
+	if (entry == NULL || entry->svc.listener_id != listener_id) {
 		pr_err("Service id: %u is not found\n", listener_id);
 		return NULL;
 	}
@@ -337,6 +337,8 @@ static int __qseecom_set_sb_memory(struct qseecom_registered_listener_list *svc,
 
 		svc->sb_reg_req = kzalloc((sizeof(sb_init_req) +
 					sizeof(sb_init_rsp)), GFP_KERNEL);
+		if (svc->sb_reg_req == NULL)
+			return -ENOMEM;
 
 		sb_init_req.pr_cmd = TZ_SCHED_CMD_ID_REGISTER_LISTENER;
 		sb_init_req.listener_id = svc->svc.listener_id;
@@ -449,6 +451,8 @@ static int qseecom_unregister_listener(struct qseecom_dev_handle *data)
 		struct qseecom_registered_listener_list *svc;
 
 		svc = __qseecom_find_svc(data->listener.id);
+		if (!svc)
+			return -ENODATA;
 		sb_init_req.pr_cmd = TZ_SCHED_CMD_ID_REGISTER_LISTENER;
 		sb_init_req.listener_id = data->listener.id;
 		sb_init_req.sb_len = 0;
@@ -1431,7 +1435,7 @@ static int __qseecom_get_fw_size(char *appname, uint32_t *fw_size)
 
 	snprintf(fw_name, sizeof(fw_name), "%s.mdt", appname);
 	rc = request_firmware(&fw_entry, fw_name,  qseecom.pdev);
-	if (rc) {
+	if (rc || !fw_entry) {
 		pr_err("error with request_firmware\n");
 		ret = -EIO;
 		goto err;
@@ -1449,7 +1453,7 @@ static int __qseecom_get_fw_size(char *appname, uint32_t *fw_size)
 		memset(fw_name, 0, sizeof(fw_name));
 		snprintf(fw_name, ARRAY_SIZE(fw_name), "%s.b%02d", appname, i);
 		ret = request_firmware(&fw_entry, fw_name, qseecom.pdev);
-		if (ret)
+		if (ret || !fw_entry)
 			goto err;
 		*fw_size += fw_entry->size;
 		release_firmware(fw_entry);
@@ -1475,7 +1479,7 @@ static int __qseecom_get_fw_data(char *appname, u8 *img_data,
 
 	snprintf(fw_name, sizeof(fw_name), "%s.mdt", appname);
 	rc = request_firmware(&fw_entry, fw_name,  qseecom.pdev);
-	if (rc) {
+	if (rc || !fw_entry) {
 		ret = -EIO;
 		goto err;
 	}
@@ -1489,7 +1493,7 @@ static int __qseecom_get_fw_data(char *appname, u8 *img_data,
 	for (i = 0; i < num_images; i++) {
 		snprintf(fw_name, ARRAY_SIZE(fw_name), "%s.b%02d", appname, i);
 		ret = request_firmware(&fw_entry, fw_name,  qseecom.pdev);
-		if (ret) {
+		if (ret || !fw_entry) {
 			pr_err("Failed to locate blob %s\n", fw_name);
 			goto err;
 		}
@@ -1593,7 +1597,8 @@ int qseecom_start_app(struct qseecom_handle **handle,
 
 	if (!app_name || strlen(app_name) >= MAX_APP_NAME_SIZE) {
 		pr_err("The app_name (%s) with length %zu is not valid\n",
-			app_name, strlen(app_name));
+			app_name ? app_name : "NULL",
+			app_name ? strlen(app_name) : 0);
 		return -EINVAL;
 	}
 

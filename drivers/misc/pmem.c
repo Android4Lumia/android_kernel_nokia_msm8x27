@@ -1,7 +1,7 @@
 /* drivers/android/pmem.c
  *
  * Copyright (C) 2007 Google, Inc.
- * Copyright (c) 2009-2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2009-2012, 2016, The Linux Foundation. All rights reserved.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -2311,6 +2311,9 @@ static void pmem_revoke(struct file *file, struct pmem_data *data)
 	struct mm_struct *mm = NULL;
 	int id = get_id(file);
 	int ret = 0;
+
+	if (unlikely(id >= PMEM_MAX_DEVICES))
+		return;
 
 	data->master_file = NULL;
 	ret = pmem_lock_data_and_mm(file, data, &mm);
