@@ -29,11 +29,6 @@
 #include <linux/workqueue.h>
 #include <linux/bma250.h>
 #include <mach/gpio.h>
-/*FIH-MTD-PERIPHERAL-CH-ESD-00++[*/
-#ifdef CONFIG_FIH_TOUCHSCREEN_CYTTSP_I2C_TMA340_ESD
-#include <linux/cyttsp_i2c_tma340.h>
-#endif
-/*FIH-MTD-PERIPHERAL-CH-ESD-00++]*/
 
 /*MTD-PERIPHERAL-AC-Layout-01+{*/
 #include <linux/fih_hw_info.h>
@@ -355,15 +350,6 @@ static void bma250_read_accel_xyz(struct bma250_data *bma250)
     bma250->value.y = data[1];
     bma250->value.z = data[2];
     mutex_unlock(&bma250->value_mutex);
-
-/*FIH-MTD-PERIPHERAL-CH-ESD-00++[*/
-#ifdef CONFIG_FIH_TOUCHSCREEN_CYTTSP_I2C_TMA340_ESD	
-	if(bma250->value.z < -200)
-		TOUCH_ESD_WORKAROUND(CY_FACE_DOWN);
-	else
-		TOUCH_ESD_WORKAROUND(CY_FACE_UP);
-#endif
-/*FIH-MTD-PERIPHERAL-CH-ESD-00++]*/
 
     timestamp = ktime_get_boottime();
     input_report_abs(bma250->input, ABS_X, bma250->value.x);
