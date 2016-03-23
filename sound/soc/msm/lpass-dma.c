@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2011, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2011,2014,2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -57,7 +57,7 @@ static int dai_find_dma_channel(uint32_t intrsrc)
 	int i, dma_channel = 0;
 	pr_debug("%s\n", __func__);
 
-	for (i = 0; i <= 27; i += 3) {
+	for (i = 0; i < 27; i += 3) {
 		if (intrsrc & (1 << i)) {
 			dma_channel = i / 3;
 			break;
