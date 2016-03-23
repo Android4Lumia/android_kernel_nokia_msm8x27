@@ -229,7 +229,7 @@ static u16 l2cap_seq_list_remove(struct l2cap_seq_list *seq_list, u16 seq)
 {
 	u16 mask = seq_list->mask;
 
-	BT_DBG("seq_list %p, seq %d", seq_list, (int) seq);
+	BT_DBG("seq_list %pK, seq %d", seq_list, (int) seq);
 
 	if (seq_list->head == L2CAP_SEQ_LIST_CLEAR) {
 		/* In case someone tries to pop the head of an empty list */
@@ -286,7 +286,7 @@ static void l2cap_seq_list_append(struct l2cap_seq_list *seq_list, u16 seq)
 {
 	u16 mask = seq_list->mask;
 
-	BT_DBG("seq_list %p, seq %d", seq_list, (int) seq);
+	BT_DBG("seq_list %pK, seq %d", seq_list, (int) seq);
 
 	if (seq_list->list[seq & mask] == L2CAP_SEQ_LIST_CLEAR) {
 		if (seq_list->tail == L2CAP_SEQ_LIST_CLEAR)
@@ -409,13 +409,13 @@ static void __get_extended_control(u32 extended,
 
 static inline void l2cap_ertm_stop_ack_timer(struct l2cap_pinfo *pi)
 {
-	BT_DBG("pi %p", pi);
+	BT_DBG("pi %pK", pi);
 	__cancel_delayed_work(&pi->ack_work);
 }
 
 static inline void l2cap_ertm_start_ack_timer(struct l2cap_pinfo *pi)
 {
-	BT_DBG("pi %p, pending %d", pi, delayed_work_pending(&pi->ack_work));
+	BT_DBG("pi %pK, pending %d", pi, delayed_work_pending(&pi->ack_work));
 	if (!delayed_work_pending(&pi->ack_work)) {
 		queue_delayed_work(_l2cap_wq, &pi->ack_work,
 				msecs_to_jiffies(L2CAP_DEFAULT_ACK_TO));
@@ -424,13 +424,13 @@ static inline void l2cap_ertm_start_ack_timer(struct l2cap_pinfo *pi)
 
 static inline void l2cap_ertm_stop_retrans_timer(struct l2cap_pinfo *pi)
 {
-	BT_DBG("pi %p", pi);
+	BT_DBG("pi %pK", pi);
 	__cancel_delayed_work(&pi->retrans_work);
 }
 
 static inline void l2cap_ertm_start_retrans_timer(struct l2cap_pinfo *pi)
 {
-	BT_DBG("pi %p", pi);
+	BT_DBG("pi %pK", pi);
 	if (!delayed_work_pending(&pi->monitor_work) && pi->retrans_timeout) {
 		__cancel_delayed_work(&pi->retrans_work);
 		queue_delayed_work(_l2cap_wq, &pi->retrans_work,
@@ -440,13 +440,13 @@ static inline void l2cap_ertm_start_retrans_timer(struct l2cap_pinfo *pi)
 
 static inline void l2cap_ertm_stop_monitor_timer(struct l2cap_pinfo *pi)
 {
-	BT_DBG("pi %p", pi);
+	BT_DBG("pi %pK", pi);
 	__cancel_delayed_work(&pi->monitor_work);
 }
 
 static inline void l2cap_ertm_start_monitor_timer(struct l2cap_pinfo *pi)
 {
-	BT_DBG("pi %p", pi);
+	BT_DBG("pi %pK", pi);
 	l2cap_ertm_stop_retrans_timer(pi);
 	__cancel_delayed_work(&pi->monitor_work);
 	if (pi->monitor_timeout) {
@@ -500,7 +500,7 @@ static void __l2cap_chan_add(struct l2cap_conn *conn, struct sock *sk)
 {
 	struct l2cap_chan_list *l = &conn->chan_list;
 
-	BT_DBG("conn %p, psm 0x%2.2x, dcid 0x%4.4x", conn,
+	BT_DBG("conn %pK, psm 0x%2.2x, dcid 0x%4.4x", conn,
 			l2cap_pi(sk)->psm, l2cap_pi(sk)->dcid);
 
 	conn->disc_reason = 0x13;
@@ -555,7 +555,7 @@ void l2cap_chan_del(struct sock *sk, int err)
 
 	l2cap_sock_clear_timer(sk);
 
-	BT_DBG("sk %p, conn %p, err %d", sk, conn, err);
+	BT_DBG("sk %pK, conn %pK, err %d", sk, conn, err);
 
 	if (conn) {
 		struct l2cap_chan_list *l = &conn->chan_list;
@@ -844,7 +844,7 @@ static void l2cap_conn_start(struct l2cap_conn *conn)
 	struct sock_del_list del, *tmp1, *tmp2;
 	struct sock *sk;
 
-	BT_DBG("conn %p", conn);
+	BT_DBG("conn %pK", conn);
 
 	INIT_LIST_HEAD(&del.list);
 
@@ -1072,7 +1072,7 @@ static void l2cap_conn_ready(struct l2cap_conn *conn)
 	struct l2cap_chan_list *l = &conn->chan_list;
 	struct sock *sk;
 
-	BT_DBG("conn %p", conn);
+	BT_DBG("conn %pK", conn);
 
 	if (!conn->hcon->out && conn->hcon->type == LE_LINK)
 		l2cap_le_conn_ready(conn);
@@ -1121,7 +1121,7 @@ static void l2cap_conn_unreliable(struct l2cap_conn *conn, int err)
 	struct l2cap_chan_list *l = &conn->chan_list;
 	struct sock *sk;
 
-	BT_DBG("conn %p", conn);
+	BT_DBG("conn %pK", conn);
 
 	read_lock(&l->lock);
 
@@ -1157,7 +1157,7 @@ static struct l2cap_conn *l2cap_conn_add(struct hci_conn *hcon, u8 status)
 	hcon->l2cap_data = conn;
 	conn->hcon = hcon;
 
-	BT_DBG("hcon %p conn %p", hcon, conn);
+	BT_DBG("hcon %pK conn %pK", hcon, conn);
 
 	if (hcon->hdev->le_mtu && hcon->type == LE_LINK)
 		conn->mtu = hcon->hdev->le_mtu;
@@ -1193,16 +1193,16 @@ void l2cap_conn_del(struct hci_conn *hcon, int err, u8 is_process)
 	if (!conn)
 		return;
 
-	BT_DBG("hcon %p conn %p, err %d", hcon, conn, err);
+	BT_DBG("hcon %pK conn %pK, err %d", hcon, conn, err);
 
 	if ((conn->hcon == hcon) && (conn->rx_skb))
 		kfree_skb(conn->rx_skb);
 
-	BT_DBG("conn->hcon %p", conn->hcon);
+	BT_DBG("conn->hcon %pK", conn->hcon);
 
 	/* Kill channels */
 	for (sk = conn->chan_list.head; sk; ) {
-		BT_DBG("ampcon %p", l2cap_pi(sk)->ampcon);
+		BT_DBG("ampcon %pK", l2cap_pi(sk)->ampcon);
 		if ((conn->hcon == hcon) || (l2cap_pi(sk)->ampcon == hcon)) {
 			next = l2cap_pi(sk)->next_c;
 			if (is_process)
@@ -1410,7 +1410,7 @@ static void l2cap_ertm_tx_worker(struct work_struct *work)
 	struct l2cap_pinfo *pi =
 		container_of(work, struct l2cap_pinfo, tx_work);
 	struct sock *sk = (struct sock *)pi;
-	BT_DBG("%p", pi);
+	BT_DBG("%pK", pi);
 
 	lock_sock(sk);
 	l2cap_ertm_send(sk);
@@ -1436,11 +1436,11 @@ void l2cap_do_send(struct sock *sk, struct sk_buff *skb)
 {
 	struct l2cap_pinfo *pi = l2cap_pi(sk);
 
-	BT_DBG("sk %p, skb %p len %d", sk, skb, skb->len);
+	BT_DBG("sk %pK, skb %pK len %d", sk, skb, skb->len);
 
 	if (pi->ampcon && (pi->amp_move_state == L2CAP_AMP_STATE_STABLE ||
 			pi->amp_move_state == L2CAP_AMP_STATE_WAIT_PREPARE)) {
-		BT_DBG("Sending on AMP connection %p %p",
+		BT_DBG("Sending on AMP connection %pK %pK",
 			pi->ampcon, pi->ampchan);
 		if (pi->ampchan)
 			hci_send_acl(pi->ampcon, pi->ampchan, skb,
@@ -1456,7 +1456,7 @@ void l2cap_do_send(struct sock *sk, struct sk_buff *skb)
 		}
 
 		bt_cb(skb)->force_active = pi->force_active;
-		BT_DBG("Sending on BR/EDR connection %p", pi->conn->hcon);
+		BT_DBG("Sending on BR/EDR connection %pK", pi->conn->hcon);
 
 		if (lmp_no_flush_capable(pi->conn->hcon->hdev) &&
 			!l2cap_pi(sk)->flushable)
@@ -1475,7 +1475,7 @@ int l2cap_ertm_send(struct sock *sk)
 	struct bt_l2cap_control *control;
 	int sent = 0;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (sk->sk_state != BT_CONNECTED)
 		return -ENOTCONN;
@@ -1558,7 +1558,7 @@ int l2cap_strm_tx(struct sock *sk, struct sk_buff_head *skbs)
 	struct bt_l2cap_control *control;
 	int sent = 0;
 
-	BT_DBG("sk %p, skbs %p", sk, skbs);
+	BT_DBG("sk %pK, skbs %pK", sk, skbs);
 
 	if (sk->sk_state != BT_CONNECTED)
 		return -ENOTCONN;
@@ -1574,12 +1574,12 @@ int l2cap_strm_tx(struct sock *sk, struct sk_buff_head *skbs)
 
 		skb = skb_dequeue(TX_QUEUE(sk));
 
-		BT_DBG("skb %p", skb);
+		BT_DBG("skb %pK", skb);
 
 		bt_cb(skb)->retries = 1;
 		control = &bt_cb(skb)->control;
 
-		BT_DBG("control %p", control);
+		BT_DBG("control %pK", control);
 
 		control->reqseq = 0;
 		control->txseq = pi->next_tx_seq;
@@ -1635,7 +1635,7 @@ static inline int l2cap_skbuff_fromiovec(struct sock *sk, struct msghdr *msg,
 	struct sk_buff *final;
 	int err, sent = 0;
 
-	BT_DBG("sk %p, msg %p, len %d, count %d, skb %p", sk,
+	BT_DBG("sk %pK, msg %pK, len %d, count %d, skb %pK", sk,
 		msg, (int)len, (int)count, skb);
 
 	if (!conn)
@@ -1738,7 +1738,7 @@ struct sk_buff *l2cap_create_connless_pdu(struct sock *sk, struct msghdr *msg, s
 	int err, count, hlen = L2CAP_HDR_SIZE + 2;
 	struct l2cap_hdr *lh;
 
-	BT_DBG("sk %p len %d", sk, (int)len);
+	BT_DBG("sk %pK len %d", sk, (int)len);
 
 	count = min_t(unsigned int, (conn->mtu - hlen), len);
 	skb = bt_skb_send_alloc(sk, count + hlen,
@@ -1767,7 +1767,7 @@ struct sk_buff *l2cap_create_basic_pdu(struct sock *sk, struct msghdr *msg, size
 	int err, count, hlen = L2CAP_HDR_SIZE;
 	struct l2cap_hdr *lh;
 
-	BT_DBG("sk %p len %d", sk, (int)len);
+	BT_DBG("sk %pK len %d", sk, (int)len);
 
 	count = min_t(unsigned int, (conn->mtu - hlen), len);
 	skb = bt_skb_send_alloc(sk, count + hlen,
@@ -1809,7 +1809,7 @@ struct sk_buff *l2cap_create_iframe_pdu(struct sock *sk,
 	if (fcs == L2CAP_FCS_CRC16)
 		hlen += L2CAP_FCS_SIZE;
 
-	BT_DBG("sk %p, msg %p, len %d, sdulen %d, hlen %d",
+	BT_DBG("sk %pK, msg %pK, len %d, sdulen %d, hlen %d",
 		sk, msg, (int)len, (int)sdulen, hlen);
 
 	count = min_t(unsigned int, (l2cap_pi(sk)->conn->mtu - hlen), len);
@@ -1873,7 +1873,7 @@ static void l2cap_ertm_process_reqseq(struct sock *sk, u16 reqseq)
 	struct sk_buff *acked_skb;
 	u16 ackseq;
 
-	BT_DBG("sk %p, reqseq %d", sk, (int) reqseq);
+	BT_DBG("sk %pK, reqseq %d", sk, (int) reqseq);
 
 	pi = l2cap_pi(sk);
 
@@ -1954,7 +1954,7 @@ static void l2cap_ertm_send_sframe(struct sock *sk,
 	struct sk_buff *skb;
 	u32 control_field;
 
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 
 	if (control->frame_type != 's')
 		return;
@@ -2004,7 +2004,7 @@ static void l2cap_ertm_send_ack(struct sock *sk)
 	u16 frames_to_ack = __delta_seq(pi->buffer_seq, pi->last_acked_seq, pi);
 	int threshold;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 	BT_DBG("last_acked_seq %d, buffer_seq %d", (int)pi->last_acked_seq,
 		(int)pi->buffer_seq);
 
@@ -2053,7 +2053,7 @@ static void l2cap_ertm_send_rr_or_rnr(struct sock *sk, bool poll)
 	struct l2cap_pinfo *pi;
 	struct bt_l2cap_control control;
 
-	BT_DBG("sk %p, poll %d", sk, (int) poll);
+	BT_DBG("sk %pK, poll %d", sk, (int) poll);
 
 	pi = l2cap_pi(sk);
 
@@ -2075,7 +2075,7 @@ static void l2cap_ertm_send_i_or_rr_or_rnr(struct sock *sk)
 	struct l2cap_pinfo *pi;
 	struct bt_l2cap_control control;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -2114,7 +2114,7 @@ static void l2cap_ertm_send_srej(struct sock *sk, u16 txseq)
 	struct l2cap_pinfo *pi;
 	u16 seq;
 
-	BT_DBG("sk %p, txseq %d", sk, (int)txseq);
+	BT_DBG("sk %pK, txseq %d", sk, (int)txseq);
 
 	pi = l2cap_pi(sk);
 	memset(&control, 0, sizeof(control));
@@ -2138,7 +2138,7 @@ static void l2cap_ertm_send_srej_tail(struct sock *sk)
 	struct bt_l2cap_control control;
 	struct l2cap_pinfo *pi;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -2159,7 +2159,7 @@ static void l2cap_ertm_send_srej_list(struct sock *sk, u16 txseq)
 	u16 initial_head;
 	u16 seq;
 
-	BT_DBG("sk %p, txseq %d", sk, (int) txseq);
+	BT_DBG("sk %pK, txseq %d", sk, (int) txseq);
 
 	pi = l2cap_pi(sk);
 	memset(&control, 0, sizeof(control));
@@ -2183,7 +2183,7 @@ static void l2cap_ertm_send_srej_list(struct sock *sk, u16 txseq)
 static void l2cap_ertm_abort_rx_srej_sent(struct sock *sk)
 {
 	struct l2cap_pinfo *pi = l2cap_pi(sk);
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi->expected_tx_seq = pi->buffer_seq;
 	l2cap_seq_list_clear(&l2cap_pi(sk)->srej_list);
@@ -2198,7 +2198,7 @@ static int l2cap_ertm_tx_state_xmit(struct sock *sk,
 	struct l2cap_pinfo *pi;
 	int err = 0;
 
-	BT_DBG("sk %p, control %p, skbs %p, event %d", sk, control, skbs,
+	BT_DBG("sk %pK, control %pK, skbs %pK, event %d", sk, control, skbs,
 		(int)event);
 	pi = l2cap_pi(sk);
 
@@ -2297,7 +2297,7 @@ static int l2cap_ertm_tx_state_wait_f(struct sock *sk,
 	struct l2cap_pinfo *pi;
 	int err = 0;
 
-	BT_DBG("sk %p, control %p, skbs %p, event %d", sk, control, skbs,
+	BT_DBG("sk %pK, control %pK, skbs %pK, event %d", sk, control, skbs,
 		(int)event);
 	pi = l2cap_pi(sk);
 
@@ -2379,7 +2379,7 @@ int l2cap_ertm_tx(struct sock *sk, struct bt_l2cap_control *control,
 	struct l2cap_pinfo *pi;
 	int err = 0;
 
-	BT_DBG("sk %p, control %p, skbs %p, event %d, state %d",
+	BT_DBG("sk %pK, control %pK, skbs %pK, event %d, state %d",
 		sk, control, skbs, (int)event, l2cap_pi(sk)->tx_state);
 
 	pi = l2cap_pi(sk);
@@ -2408,7 +2408,7 @@ int l2cap_segment_sdu(struct sock *sk, struct sk_buff_head* seg_queue,
 	int err = 0;
 	u8 sar;
 
-	BT_DBG("sk %p, msg %p, len %d", sk, msg, (int)len);
+	BT_DBG("sk %pK, msg %pK, len %d", sk, msg, (int)len);
 
 	/* It is critical that ERTM PDUs fit in a single HCI fragment,
 	 * so fragmented skbs are not used.  The HCI layer's handling
@@ -2441,7 +2441,7 @@ int l2cap_segment_sdu(struct sock *sk, struct sk_buff_head* seg_queue,
 	while (len) {
 		skb = l2cap_create_iframe_pdu(sk, msg, pdu_len, sdu_len, reseg);
 
-		BT_DBG("iframe skb %p", skb);
+		BT_DBG("iframe skb %pK", skb);
 
 		if (IS_ERR(skb)) {
 			__skb_queue_purge(seg_queue);
@@ -2479,7 +2479,7 @@ static inline int l2cap_skbuff_to_kvec(struct sk_buff *skb, struct kvec *iv,
 {
 	struct sk_buff *frag_iter;
 
-	BT_DBG("skb %p (len %d), iv %p", skb, (int)skb->len, iv);
+	BT_DBG("skb %pK (len %d), iv %pK", skb, (int)skb->len, iv);
 
 	if (iv->iov_len + skb->len > veclen)
 		return -ENOMEM;
@@ -2511,7 +2511,7 @@ int l2cap_resegment_queue(struct sock *sk, struct sk_buff_head *queue)
 	struct sk_buff_head old_frames;
 	struct l2cap_pinfo *pi = l2cap_pi(sk);
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (skb_queue_empty(queue))
 		return 0;
@@ -2620,7 +2620,7 @@ int l2cap_resegment_queue(struct sock *sk, struct sk_buff_head *queue)
 					msg.msg_iovlen, 1);
 
 		if (err || skb_queue_empty(&current_sdu)) {
-			BT_DBG("Error %d resegmenting data for socket %p",
+			BT_DBG("Error %d resegmenting data for socket %pK",
 				err, sk);
 			__skb_queue_purge(&current_sdu);
 			break;
@@ -2685,7 +2685,7 @@ static void l2cap_resegment_worker(struct work_struct *work)
 
 	kfree(seg_work);
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 	lock_sock(sk);
 
 	if (l2cap_pi(sk)->amp_move_state != L2CAP_AMP_STATE_RESEGMENT) {
@@ -2716,7 +2716,7 @@ static int l2cap_setup_resegment(struct sock *sk)
 {
 	struct l2cap_resegment_work *seg_work;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (skb_queue_empty(TX_QUEUE(sk)))
 		return 0;
@@ -2756,7 +2756,7 @@ static inline int l2cap_rmem_full(struct sock *sk)
 
 void l2cap_amp_move_init(struct sock *sk)
 {
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (!l2cap_pi(sk)->conn)
 		return;
@@ -2786,7 +2786,7 @@ static void l2cap_chan_ready(struct sock *sk)
 {
 	struct sock *parent = bt_sk(sk)->parent;
 
-	BT_DBG("sk %p, parent %p", sk, parent);
+	BT_DBG("sk %pK, parent %pK", sk, parent);
 
 	l2cap_pi(sk)->conf_state = 0;
 	l2cap_sock_clear_timer(sk);
@@ -2812,7 +2812,7 @@ static void l2cap_raw_recv(struct l2cap_conn *conn, struct sk_buff *skb)
 	struct sk_buff *nskb;
 	struct sock *sk;
 
-	BT_DBG("conn %p", conn);
+	BT_DBG("conn %pK", conn);
 
 	read_lock(&l->lock);
 	for (sk = l->head; sk; sk = l2cap_pi(sk)->next_c) {
@@ -2842,7 +2842,7 @@ static struct sk_buff *l2cap_build_cmd(struct l2cap_conn *conn,
 	int len, count;
 	unsigned int mtu = conn->hcon->hdev->acl_mtu;
 
-	BT_DBG("conn %p, code 0x%2.2x, ident 0x%2.2x, len %d",
+	BT_DBG("conn %pK, code 0x%2.2x, ident 0x%2.2x, len %d",
 			conn, code, ident, dlen);
 
 	len = L2CAP_HDR_SIZE + L2CAP_CMD_HDR_SIZE + dlen;
@@ -2969,7 +2969,7 @@ static void l2cap_ertm_ack_timeout(struct work_struct *work)
 	struct sock *sk = (struct sock *)pi;
 	u16 frames_to_ack;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (!sk)
 		return;
@@ -2999,7 +2999,7 @@ static void l2cap_ertm_retrans_timeout(struct work_struct *work)
 		container_of(delayed, struct l2cap_pinfo, retrans_work);
 	struct sock *sk = (struct sock *)pi;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (!sk)
 		return;
@@ -3023,7 +3023,7 @@ static void l2cap_ertm_monitor_timeout(struct work_struct *work)
 		container_of(delayed, struct l2cap_pinfo, monitor_work);
 	struct sock *sk = (struct sock *)pi;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (!sk)
 		return;
@@ -3178,7 +3178,7 @@ static int l2cap_aggregate(struct hci_chan *chan, struct l2cap_pinfo *pi)
 	struct hci_ext_fs tx_fs;
 	struct hci_ext_fs rx_fs;
 
-	BT_DBG("chan %p", chan);
+	BT_DBG("chan %pK", chan);
 
 	if (((chan->tx_fs.max_sdu == 0xFFFF) ||
 			(chan->tx_fs.sdu_arr_time == 0xFFFFFFFF)) &&
@@ -3220,7 +3220,7 @@ static int l2cap_deaggregate(struct hci_chan *chan, struct l2cap_pinfo *pi)
 	struct hci_ext_fs tx_fs;
 	struct hci_ext_fs rx_fs;
 
-	BT_DBG("chan %p", chan);
+	BT_DBG("chan %pK", chan);
 
 	if (((chan->tx_fs.max_sdu == 0xFFFF) ||
 			(chan->tx_fs.sdu_arr_time == 0xFFFFFFFF)) &&
@@ -3326,7 +3326,7 @@ int l2cap_build_conf_req(struct sock *sk, void *data)
 	struct l2cap_conf_rfc rfc = { .mode = pi->mode };
 	void *ptr = req->data;
 
-	BT_DBG("sk %p mode %d", sk, pi->mode);
+	BT_DBG("sk %pK mode %d", sk, pi->mode);
 
 	if (pi->num_conf_req || pi->num_conf_rsp)
 		goto done;
@@ -3445,7 +3445,7 @@ static int l2cap_build_amp_reconf_req(struct sock *sk, void *data)
 	struct l2cap_conf_rfc rfc = { .mode = pi->mode };
 	void *ptr = req->data;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	switch (pi->mode) {
 	case L2CAP_MODE_ERTM:
@@ -3499,7 +3499,7 @@ static int l2cap_parse_conf_req(struct sock *sk, void *data)
 	u16 mtu = L2CAP_DEFAULT_MTU;
 	u16 result = L2CAP_CONF_SUCCESS;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	if (pi->omtu > mtu)
 		mtu = pi->omtu;
@@ -3718,7 +3718,7 @@ static int l2cap_parse_amp_move_reconf_req(struct sock *sk, void *data)
 	u16 tx_win = pi->remote_tx_win;
 	u16 result = L2CAP_CONF_SUCCESS;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	while (len >= L2CAP_CONF_OPT_SIZE) {
 		len -= l2cap_get_conf_opt(&req, &type, &olen, &val);
@@ -3841,7 +3841,7 @@ static int l2cap_parse_conf_rsp(struct sock *sk, void *rsp, int len, void *data,
 	unsigned long val;
 	struct l2cap_conf_rfc rfc;
 
-	BT_DBG("sk %p, rsp %p, len %d, req %p", sk, rsp, len, data);
+	BT_DBG("sk %pK, rsp %pK, len %d, req %pK", sk, rsp, len, data);
 
 	/* Initialize rfc in case no rfc option is received */
 	rfc.mode = pi->mode;
@@ -3926,7 +3926,7 @@ static int l2cap_build_conf_rsp(struct sock *sk, void *data, u16 result, u16 fla
 	struct l2cap_conf_rsp *rsp = data;
 	void *ptr = rsp->data;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	rsp->scid   = cpu_to_le16(l2cap_pi(sk)->dcid);
 	rsp->result = cpu_to_le16(result);
@@ -3943,7 +3943,7 @@ static void l2cap_conf_rfc_get(struct sock *sk, void *rsp, int len)
 	struct l2cap_conf_rfc rfc;
 	u16 txwin_ext = pi->ack_win;
 
-	BT_DBG("sk %p, rsp %p, len %d", sk, rsp, len);
+	BT_DBG("sk %pK, rsp %pK, len %d", sk, rsp, len);
 
 	/* Initialize rfc in case no rfc option is received */
 	rfc.mode = pi->mode;
@@ -3991,7 +3991,7 @@ static void l2cap_conf_ext_fs_get(struct sock *sk, void *rsp, int len)
 	unsigned long val;
 	struct l2cap_conf_ext_fs fs;
 
-	BT_DBG("sk %p, rsp %p, len %d", sk, rsp, len);
+	BT_DBG("sk %pK, rsp %pK, len %d", sk, rsp, len);
 
 	while (len >= L2CAP_CONF_OPT_SIZE) {
 		len -= l2cap_get_conf_opt(&rsp, &type, &olen, &val);
@@ -4016,7 +4016,7 @@ static int l2cap_finish_amp_move(struct sock *sk)
 	struct l2cap_pinfo *pi;
 	int err;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -4040,7 +4040,7 @@ static int l2cap_amp_move_reconf_rsp(struct sock *sk, void *rsp, int len,
 	struct l2cap_conf_rfc rfc = {.mode = L2CAP_MODE_BASIC};
 	struct l2cap_pinfo *pi = l2cap_pi(sk);
 
-	BT_DBG("sk %p, rsp %p, len %d, res 0x%2.2x", sk, rsp, len, result);
+	BT_DBG("sk %pK, rsp %pK, len %d, res 0x%2.2x", sk, rsp, len, result);
 
 	if (pi->reconf_state == L2CAP_RECONF_NONE)
 		return -ECONNREFUSED;
@@ -4786,7 +4786,7 @@ static void l2cap_send_move_chan_req(struct l2cap_conn *conn,
 	struct l2cap_move_chan_req req;
 	u8 ident;
 
-	BT_DBG("pi %p, icid %d, dest_amp_id %d", pi, (int) icid,
+	BT_DBG("pi %pK, icid %d, dest_amp_id %d", pi, (int) icid,
 		(int) dest_amp_id);
 
 	ident = l2cap_get_ident(conn);
@@ -4896,7 +4896,7 @@ static inline int l2cap_create_channel_req(struct l2cap_conn *conn,
 static inline int l2cap_create_channel_rsp(struct l2cap_conn *conn,
 					struct l2cap_cmd_hdr *cmd, u8 *data)
 {
-	BT_DBG("conn %p", conn);
+	BT_DBG("conn %pK", conn);
 
 	return l2cap_connect_rsp(conn, cmd, data);
 }
@@ -5315,7 +5315,7 @@ void l2cap_amp_physical_complete(int result, u8 local_id, u8 remote_id,
 {
 	struct l2cap_pinfo *pi;
 
-	BT_DBG("result %d, local_id %d, remote_id %d, sk %p", result,
+	BT_DBG("result %d, local_id %d, remote_id %d, sk %pK", result,
 		(int) local_id, (int) remote_id, sk);
 
 	lock_sock(sk);
@@ -5446,15 +5446,15 @@ static void l2cap_logical_link_complete(struct hci_chan *chan, u8 status)
 	struct hci_conn *ampcon;
 
 	if (chan == NULL) {
-		BT_ERR("%s: status %d, chan %p", __func__, (int) status, chan);
+		BT_ERR("%s: status %d, chan %pK", __func__, (int) status, chan);
 		return;
 	}
-	BT_DBG("status %d, chan %p, conn %p", (int) status, chan, chan->conn);
+	BT_DBG("status %d, chan %pK, conn %pK", (int) status, chan, chan->conn);
 
 	sk = chan->l2cap_sk;
 	chan->l2cap_sk = NULL;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	lock_sock(sk);
 
@@ -5639,7 +5639,7 @@ int l2cap_modify_cfm(struct hci_chan *chan, u8 status)
 {
 	struct l2cap_conn *conn = chan->conn->l2cap_data;
 
-	BT_DBG("chan %p conn %p status %d", chan, conn, status);
+	BT_DBG("chan %pK conn %pK status %d", chan, conn, status);
 
 	/* TODO: if failed status restore previous fs */
 	return 0;
@@ -5651,7 +5651,7 @@ int l2cap_destroy_cfm(struct hci_chan *chan, u8 reason)
 	struct l2cap_conn *conn = chan->conn->l2cap_data;
 	struct sock *sk;
 
-	BT_DBG("chan %p conn %p", chan, conn);
+	BT_DBG("chan %pK conn %pK", chan, conn);
 
 	if (!conn)
 		return 0;
@@ -5946,14 +5946,14 @@ static int l2cap_check_fcs(struct l2cap_pinfo *pi,  struct sk_buff *skb)
 static void l2cap_ertm_pass_to_tx(struct sock *sk,
 				struct bt_l2cap_control *control)
 {
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 	l2cap_ertm_tx(sk, control, 0, L2CAP_ERTM_EVENT_RECV_REQSEQ_AND_FBIT);
 }
 
 static void l2cap_ertm_pass_to_tx_fbit(struct sock *sk,
 				struct bt_l2cap_control *control)
 {
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 	l2cap_ertm_tx(sk, control, 0, L2CAP_ERTM_EVENT_RECV_FBIT);
 }
 
@@ -5965,7 +5965,7 @@ static void l2cap_ertm_resend(struct sock *sk)
 	struct sk_buff *tx_skb;
 	u16 seq;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -6046,7 +6046,7 @@ static void l2cap_ertm_resend(struct sock *sk)
 static inline void l2cap_ertm_retransmit(struct sock *sk,
 					struct bt_l2cap_control *control)
 {
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 
 	l2cap_seq_list_append(&l2cap_pi(sk)->retrans_list, control->reqseq);
 	l2cap_ertm_resend(sk);
@@ -6058,7 +6058,7 @@ static void l2cap_ertm_retransmit_all(struct sock *sk,
 	struct l2cap_pinfo *pi;
 	struct sk_buff *skb;
 
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 
 	pi = l2cap_pi(sk);
 
@@ -6095,7 +6095,7 @@ static inline void append_skb_frag(struct sk_buff *skb,
 	/* skb->len reflects data in skb as well as all fragments
 	   skb->data_len reflects only data in fragments
 	 */
-	BT_DBG("skb %p, new_frag %p, *last_frag %p", skb, new_frag, *last_frag);
+	BT_DBG("skb %pK, new_frag %pK, *last_frag %pK", skb, new_frag, *last_frag);
 
 	if (!skb_has_frag_list(skb))
 		skb_shinfo(skb)->frag_list = new_frag;
@@ -6116,7 +6116,7 @@ static int l2cap_ertm_rx_expected_iframe(struct sock *sk,
 	struct l2cap_pinfo *pi;
 	int err = -EINVAL;
 
-	BT_DBG("sk %p, control %p, skb %p len %d truesize %d", sk, control,
+	BT_DBG("sk %pK, control %pK, skb %pK len %d truesize %d", sk, control,
 		skb, skb->len, skb->truesize);
 
 	if (!control)
@@ -6244,7 +6244,7 @@ static int l2cap_ertm_rx_queued_iframes(struct sock *sk)
 
 	struct l2cap_pinfo *pi;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 	pi = l2cap_pi(sk);
 
 	while (l2cap_rmem_available(sk)) {
@@ -6279,7 +6279,7 @@ static void l2cap_ertm_handle_srej(struct sock *sk,
 	struct l2cap_pinfo *pi;
 	struct sk_buff *skb;
 
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 
 	pi = l2cap_pi(sk);
 
@@ -6343,7 +6343,7 @@ static void l2cap_ertm_handle_rej(struct sock *sk,
 	struct l2cap_pinfo *pi;
 	struct sk_buff *skb;
 
-	BT_DBG("sk %p, control %p", sk, control);
+	BT_DBG("sk %pK, control %pK", sk, control);
 
 	pi = l2cap_pi(sk);
 
@@ -6383,7 +6383,7 @@ static u8 l2cap_ertm_classify_txseq(struct sock *sk, u16 txseq)
 {
 	struct l2cap_pinfo *pi;
 
-	BT_DBG("sk %p, txseq %d", sk, (int)txseq);
+	BT_DBG("sk %pK, txseq %d", sk, (int)txseq);
 	pi = l2cap_pi(sk);
 
 	BT_DBG("last_acked_seq %d, expected_tx_seq %d", (int)pi->last_acked_seq,
@@ -6477,7 +6477,7 @@ static int l2cap_ertm_rx_state_recv(struct sock *sk,
 	int err = 0;
 	bool skb_in_use = 0;
 
-	BT_DBG("sk %p, control %p, skb %p, event %d", sk, control, skb,
+	BT_DBG("sk %pK, control %pK, skb %pK, event %d", sk, control, skb,
 		(int)event);
 	pi = l2cap_pi(sk);
 
@@ -6533,7 +6533,7 @@ static int l2cap_ertm_rx_state_recv(struct sock *sk,
 			 */
 			skb_queue_tail(SREJ_QUEUE(sk), skb);
 			skb_in_use = 1;
-			BT_DBG("Queued %p (queue len %d)", skb,
+			BT_DBG("Queued %pK (queue len %d)", skb,
 			       skb_queue_len(SREJ_QUEUE(sk)));
 
 			pi->conn_state &= ~L2CAP_CONN_SREJ_ACT;
@@ -6600,7 +6600,7 @@ static int l2cap_ertm_rx_state_recv(struct sock *sk,
 	}
 
 	if (skb && !skb_in_use) {
-		BT_DBG("Freeing %p", skb);
+		BT_DBG("Freeing %pK", skb);
 		kfree_skb(skb);
 	}
 
@@ -6616,7 +6616,7 @@ static int l2cap_ertm_rx_state_srej_sent(struct sock *sk,
 	u16 txseq = control->txseq;
 	bool skb_in_use = 0;
 
-	BT_DBG("sk %p, control %p, skb %p, event %d", sk, control, skb,
+	BT_DBG("sk %pK, control %pK, skb %pK, event %d", sk, control, skb,
 		(int)event);
 	pi = l2cap_pi(sk);
 
@@ -6628,7 +6628,7 @@ static int l2cap_ertm_rx_state_srej_sent(struct sock *sk,
 			l2cap_ertm_pass_to_tx(sk, control);
 			skb_queue_tail(SREJ_QUEUE(sk), skb);
 			skb_in_use = 1;
-			BT_DBG("Queued %p (queue len %d)", skb,
+			BT_DBG("Queued %pK (queue len %d)", skb,
 			       skb_queue_len(SREJ_QUEUE(sk)));
 
 			pi->expected_tx_seq = __next_seq(txseq, pi);
@@ -6639,7 +6639,7 @@ static int l2cap_ertm_rx_state_srej_sent(struct sock *sk,
 			l2cap_ertm_pass_to_tx(sk, control);
 			skb_queue_tail(SREJ_QUEUE(sk), skb);
 			skb_in_use = 1;
-			BT_DBG("Queued %p (queue len %d)", skb,
+			BT_DBG("Queued %pK (queue len %d)", skb,
 			       skb_queue_len(SREJ_QUEUE(sk)));
 
 			err = l2cap_ertm_rx_queued_iframes(sk);
@@ -6654,7 +6654,7 @@ static int l2cap_ertm_rx_state_srej_sent(struct sock *sk,
 			 */
 			skb_queue_tail(SREJ_QUEUE(sk), skb);
 			skb_in_use = 1;
-			BT_DBG("Queued %p (queue len %d)", skb,
+			BT_DBG("Queued %pK (queue len %d)", skb,
 			       skb_queue_len(SREJ_QUEUE(sk)));
 
 			l2cap_ertm_pass_to_tx(sk, control);
@@ -6668,7 +6668,7 @@ static int l2cap_ertm_rx_state_srej_sent(struct sock *sk,
 			 */
 			skb_queue_tail(SREJ_QUEUE(sk), skb);
 			skb_in_use = 1;
-			BT_DBG("Queued %p (queue len %d)", skb,
+			BT_DBG("Queued %pK (queue len %d)", skb,
 			       skb_queue_len(SREJ_QUEUE(sk)));
 
 			l2cap_ertm_pass_to_tx(sk, control);
@@ -6746,7 +6746,7 @@ static int l2cap_ertm_rx_state_srej_sent(struct sock *sk,
 	}
 
 	if (skb && !skb_in_use) {
-		BT_DBG("Freeing %p", skb);
+		BT_DBG("Freeing %pK", skb);
 		kfree_skb(skb);
 	}
 
@@ -6761,7 +6761,7 @@ static int l2cap_ertm_rx_state_amp_move(struct sock *sk,
 	int err = 0;
 	bool skb_in_use = 0;
 
-	BT_DBG("sk %p, control %p, skb %p, event %d", sk, control, skb,
+	BT_DBG("sk %pK, control %pK, skb %pK, event %d", sk, control, skb,
 		(int)event);
 	pi = l2cap_pi(sk);
 
@@ -6808,7 +6808,7 @@ static int l2cap_ertm_rx_state_amp_move(struct sock *sk,
 	}
 
 	if (skb && !skb_in_use) {
-		BT_DBG("Freeing %p", skb);
+		BT_DBG("Freeing %pK", skb);
 		kfree_skb(skb);
 	}
 
@@ -6821,7 +6821,7 @@ static int l2cap_answer_move_poll(struct sock *sk)
 	struct bt_l2cap_control control;
 	int err = 0;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -6863,7 +6863,7 @@ static void l2cap_amp_move_setup(struct sock *sk)
 	struct l2cap_pinfo *pi;
 	struct sk_buff *skb;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -6899,7 +6899,7 @@ static void l2cap_amp_move_revert(struct sock *sk)
 {
 	struct l2cap_pinfo *pi;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -6916,7 +6916,7 @@ static int l2cap_amp_move_reconf(struct sock *sk)
 	u8 buf[64];
 	int err = 0;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -6929,7 +6929,7 @@ static void l2cap_amp_move_success(struct sock *sk)
 {
 	struct l2cap_pinfo *pi;
 
-	BT_DBG("sk %p", sk);
+	BT_DBG("sk %pK", sk);
 
 	pi = l2cap_pi(sk);
 
@@ -6971,7 +6971,7 @@ static int l2cap_strm_rx(struct sock *sk, struct bt_l2cap_control *control,
 	struct l2cap_pinfo *pi;
 	int err = 0;
 
-	BT_DBG("sk %p, control %p, skb %p, state %d",
+	BT_DBG("sk %pK, control %pK, skb %pK, state %d",
 		sk, control, skb, l2cap_pi(sk)->rx_state);
 
 	pi = l2cap_pi(sk);
@@ -6995,7 +6995,7 @@ static int l2cap_strm_rx(struct sock *sk, struct bt_l2cap_control *control,
 		pi->sdu_len = 0;
 
 		if (skb) {
-			BT_DBG("Freeing %p", skb);
+			BT_DBG("Freeing %pK", skb);
 			kfree_skb(skb);
 		}
 	}
@@ -7012,7 +7012,7 @@ static int l2cap_ertm_rx(struct sock *sk, struct bt_l2cap_control *control,
 	struct l2cap_pinfo *pi;
 	int err = 0;
 
-	BT_DBG("sk %p, control %p, skb %p, event %d, state %d",
+	BT_DBG("sk %pK, control %pK, skb %pK, event %d, state %d",
 		sk, control, skb, (int)event, l2cap_pi(sk)->rx_state);
 
 	pi = l2cap_pi(sk);
@@ -7143,7 +7143,7 @@ int l2cap_data_channel(struct sock *sk, struct sk_buff *skb)
 	u8 event;
 	pi = l2cap_pi(sk);
 
-	BT_DBG("sk %p, len %d, mode %d", sk, skb->len, pi->mode);
+	BT_DBG("sk %pK, len %d, mode %d", sk, skb->len, pi->mode);
 
 	if (sk->sk_state != BT_CONNECTED)
 		goto drop;
@@ -7250,7 +7250,7 @@ int l2cap_data_channel(struct sock *sk, struct sk_buff *skb)
 		goto done;
 
 	default:
-		BT_DBG("sk %p: bad mode 0x%2.2x", sk, pi->mode);
+		BT_DBG("sk %pK: bad mode 0x%2.2x", sk, pi->mode);
 		break;
 	}
 
@@ -7278,7 +7278,7 @@ static inline int l2cap_conless_channel(struct l2cap_conn *conn, __le16 psm, str
 
 	bh_lock_sock(sk);
 
-	BT_DBG("sk %p, len %d", sk, skb->len);
+	BT_DBG("sk %pK, len %d", sk, skb->len);
 
 	if (sk->sk_state != BT_BOUND && sk->sk_state != BT_CONNECTED)
 		goto drop;
@@ -7332,14 +7332,14 @@ static inline int l2cap_att_channel(struct l2cap_conn *conn, __le16 cid,
 	sk = l2cap_find_sock_by_fixed_cid_and_dir(cid, conn->src,
 							conn->dst, dir);
 
-	BT_DBG("sk %p, dir:%d", sk, dir);
+	BT_DBG("sk %pK, dir:%d", sk, dir);
 
 	if (!sk)
 		goto drop;
 
 	bh_lock_sock(sk);
 
-	BT_DBG("sk %p, len %d", sk, skb->len);
+	BT_DBG("sk %pK, len %d", sk, skb->len);
 
 	if (sk->sk_state != BT_BOUND && sk->sk_state != BT_CONNECTED) {
 		att_chn_params.cid = cid;
@@ -7483,7 +7483,7 @@ done:
 		sk = l2cap_get_chan_by_scid(&conn->chan_list, cid);
 		if (sk) {
 			if (sock_owned_by_user(sk)) {
-				BT_DBG("backlog sk %p", sk);
+				BT_DBG("backlog sk %pK", sk);
 				if (sk_add_backlog(sk, skb))
 					kfree_skb(skb);
 			} else
@@ -7541,7 +7541,7 @@ static int l2cap_connect_cfm(struct hci_conn *hcon, u8 status)
 {
 	struct l2cap_conn *conn;
 
-	BT_DBG("hcon %p bdaddr %s status %d", hcon, batostr(&hcon->dst), status);
+	BT_DBG("hcon %pK bdaddr %s status %d", hcon, batostr(&hcon->dst), status);
 
 	if (!(hcon->type == ACL_LINK || hcon->type == LE_LINK))
 		return -EINVAL;
@@ -7560,7 +7560,7 @@ static int l2cap_disconn_ind(struct hci_conn *hcon)
 {
 	struct l2cap_conn *conn = hcon->l2cap_data;
 
-	BT_DBG("hcon %p", hcon);
+	BT_DBG("hcon %pK", hcon);
 
 	if (hcon->type != ACL_LINK || !conn)
 		return 0x13;
@@ -7570,7 +7570,7 @@ static int l2cap_disconn_ind(struct hci_conn *hcon)
 
 static int l2cap_disconn_cfm(struct hci_conn *hcon, u8 reason, u8 is_process)
 {
-	BT_DBG("hcon %p reason %d", hcon, reason);
+	BT_DBG("hcon %pK reason %d", hcon, reason);
 
 	if (!(hcon->type == ACL_LINK || hcon->type == LE_LINK))
 		return -EINVAL;
@@ -7610,7 +7610,7 @@ static int l2cap_security_cfm(struct hci_conn *hcon, u8 status, u8 encrypt)
 
 	l = &conn->chan_list;
 
-	BT_DBG("conn %p", conn);
+	BT_DBG("conn %pK", conn);
 
 	read_lock(&l->lock);
 
@@ -7722,7 +7722,7 @@ static int l2cap_recv_acldata(struct hci_conn *hcon, struct sk_buff *skb, u16 fl
 	if (!conn)
 		goto drop;
 
-	BT_DBG("conn %p len %d flags 0x%x", conn, skb->len, flags);
+	BT_DBG("conn %pK len %d flags 0x%x", conn, skb->len, flags);
 
 	if (flags & ACL_START) {
 		struct l2cap_hdr *hdr;
