@@ -175,20 +175,7 @@ static void zcache_rbnode_cache_destroy(void)
 	kmem_cache_destroy(zcache_rbnode_cache);
 }
 
-static unsigned long zcache_count(struct shrinker *s,
-				  struct shrink_control *sc)
-{
-	unsigned long active_file;
-	long file_gap;
-
-	active_file = global_page_state(NR_ACTIVE_FILE);
-	file_gap = zcache_pages() - active_file;
-	if (file_gap < 0)
-		file_gap = 0;
-	return file_gap;
-}
-
-static unsigned long zcache_scan(struct shrinker *s, struct shrink_control *sc)
+static int zcache_shrink(struct shrinker *s, struct shrink_control *sc)
 {
 	unsigned long active_file;
 	unsigned long file;
@@ -254,8 +241,7 @@ end:
 }
 
 static struct shrinker zcache_shrinker = {
-	.scan_objects = zcache_scan,
-	.count_objects = zcache_count,
+	.shrink = zcache_shrink,
 	.seeks = DEFAULT_SEEKS * 16
 };
 
