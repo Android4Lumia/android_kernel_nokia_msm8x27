@@ -208,7 +208,7 @@ int get_hw_delay(int32_t path, struct hw_delay_entry *entry)
 		pr_err("ACDB=> %s Invalid path: %d\n",__func__,path);
 
 	if ((delay == NULL) || ((delay != NULL) && delay->num_entries == 0)) {
-		pr_err("ACDB=> %s Invalid delay/ delay entries\n", __func__);
+		pr_debug("ACDB=> %s Invalid delay/ delay entries\n", __func__);
 		result = -EINVAL;
 		goto done;
 	}
@@ -235,11 +235,11 @@ done:
 	mutex_unlock(&acdb_data.acdb_mutex);
 ret:
 	if (entry)
-		pr_err("ACDB=>%s: Path=%d samplerate=%u usec=%u status %d\n",
+		pr_debug("ACDB=>%s: Path=%d samplerate=%u usec=%u status %d\n",
 			__func__, path, entry->sample_rate,
 			entry->delay_usec, result);
 	else
-		pr_err("ACDB=> %s: Path=%d entry=%p status %d\n",
+		pr_debug("ACDB=> %s: Path=%d entry=%p status %d\n",
 			__func__, path, entry, result);
 	return result;
 }
