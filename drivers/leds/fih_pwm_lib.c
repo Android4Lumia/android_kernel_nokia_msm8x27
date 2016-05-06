@@ -542,7 +542,7 @@ static int pmic_gpio_led_on(struct pwm_device *pwm_dev, struct led_pmic_data *pm
 		brightness = pmic_data->on_off_pwm;
 	
 	duty_ms = (brightness * LED_PWM_PERIOD) / MAX_BRIGHTNESS;
-	PWM_MSG("duty_ms = %d", duty_ms);
+	PWM_DBG("duty_ms = %d", duty_ms);
 	ret = pwm_config(pwm_dev, duty_ms, LED_PWM_PERIOD);
 	if (ret)
 	{
@@ -1415,7 +1415,7 @@ int common_control_leds(struct pwm_device *pwm_dev, struct led_pmic_data *pmic_d
 	if (LED_HW_PMIC_GPIO <= pmic_data->hardware && pmic_data->hardware <= LED_HW_PMIC_LPG)
 	{
 		this_led_functions = led_functions_collection[pmic_data->hardware];
-		PWM_MSG("%s, we got led function hw type: %s", __func__, 
+		PWM_DBG("%s, we got led function hw type: %s", __func__, 
 						this_led_functions.name);
 	}
 	else
@@ -1435,7 +1435,7 @@ int common_control_leds(struct pwm_device *pwm_dev, struct led_pmic_data *pmic_d
 		{
 			index = 2 * pmic_data->command + 1;
 		}
-		PWM_MSG("%s, index = %d ", __func__, index);
+		PWM_DBG("%s, index = %d ", __func__, index);
 	}
 
 	//MTD-SW3-PERIPHERAL-BJ-LED_Porting-00+{

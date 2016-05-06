@@ -96,7 +96,7 @@ static void	led_on_off_set( struct led_data *data, struct command_parameter *par
 			//MTD-SW3-PERIPHERAL-OH-LED_Porting-00+}
 
 			mutex_unlock( &data->lock );
-			LED_MSG( "PMIC %s led(%s) %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
+			LED_DBG( "PMIC %s led(%s) %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
 			break;
 		}
 
@@ -144,7 +144,7 @@ static void	led_blinking_set( struct led_data *data, struct command_parameter *p
 			//MTD-SW3-PERIPHERAL-OH-LED_Porting-00+}
 			
 			mutex_unlock( &data->lock );
-			LED_MSG( "PMIC %s led(%s) blink %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
+			LED_DBG( "PMIC %s led(%s) blink %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
 			break;
 		}
 
@@ -187,7 +187,7 @@ static void	led_fade_in_out_set( struct led_data *data, struct command_parameter
 			//MTD-SW3-PERIPHERAL-OH-LED_Porting-00+}
 			
 			mutex_unlock( &data->lock );
-			LED_MSG( "PMIC %s led(%s) fade in/out %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
+			LED_DBG( "PMIC %s led(%s) fade in/out %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
 			break;
 		}
 
@@ -340,7 +340,7 @@ static void	led_sw_blinking_set( struct led_data *data, struct command_parameter
 			}
 
 			mutex_unlock( &data->lock );
-			LED_MSG( "PMIC %s led(%s) blink %s, [Pin:LPG]=[%d:%d].", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
+			LED_DBG( "PMIC %s led(%s) blink %s, [Pin:LPG]=[%d:%d].", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data->pmic_pin, pmic_data->lpg_out );
 			break;
 		}
 
@@ -448,7 +448,7 @@ static void	led_on_brightness_set( struct led_data *data, struct command_paramet
 			mutex_lock( &data->lock );
 			pmic_data->on_off_pwm	= parameter->para1;
 			mutex_unlock( &data->lock );
-			LED_MSG( "PMIC %s led(%s), set PWM(%d)", *( select_func + data->use_hw ), data->name, pmic_data->on_off_pwm );
+			LED_DBG( "PMIC %s led(%s), set PWM(%d)", *( select_func + data->use_hw ), data->name, pmic_data->on_off_pwm );
 			break;
 		}
 
@@ -1214,7 +1214,7 @@ static void led_fade_in_out_time_diff(struct led_data *data, struct command_para
 				hrtimer_start( &data->led_time_diff, ktime_set( LED_SEC(timeout), LED_NS(timeout) ), HRTIMER_MODE_REL );
 			}
 
-			LED_MSG( "PMIC %s led(%s) fade in/out %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data_r->pmic_pin, pmic_data_r->lpg_out );
+			LED_DBG( "PMIC %s led(%s) fade in/out %s, [Pin:LPG]=[%d:%d]", *( select_func + data->use_hw ), data->name, parameter->para1 == LED_TURN_OFF ? "off" : "on" , pmic_data_r->pmic_pin, pmic_data_r->lpg_out );
 
 			break;
 		}
@@ -1662,7 +1662,7 @@ static ssize_t led_control( void *node_data, struct device_attribute *attr, cons
 		}
 
 		pointer += char_count;
-		LED_MSG( "[CMD:ID:Para]=[%d:%d:%d]", user_command, led_id, command->parameter );
+		LED_DBG( "[CMD:ID:Para]=[%d:%d:%d]", user_command, led_id, command->parameter );
 
 		{
 			struct command_parameter	parameter;
@@ -1842,7 +1842,7 @@ static void	led_early_suspend_function(struct early_suspend *handler)
 	unsigned int		loop;
 
 	wake_lock_timeout( timeout_wakelock, WAIT_LOCK_TIME * HZ / 1000 );
-	LED_MSG( "Wake lock(%dms)", WAIT_LOCK_TIME );
+	LED_DBG( "Wake lock(%dms)", WAIT_LOCK_TIME );
 	parameter.para1	= LED_TURN_OFF;
 
 	for( loop = 0 ; loop < count ; ++loop )
