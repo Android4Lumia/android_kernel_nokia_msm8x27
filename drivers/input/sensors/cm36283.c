@@ -40,7 +40,13 @@
 #include <linux/fih_hw_info.h>
 /*MTD-PERIPHERAL-CH-PS_conf00++]*/
 
+//#define DEBUG_CMA26283
+
+#ifdef DEBUG_CMA26283
 #define D(x...) pr_info(x)
+#else
+#define D(x...) pr_debug(x)
+#endif
 
 #define I2C_RETRY_COUNT 10
 
@@ -365,7 +371,7 @@ static int get_ps_adc_value(uint16_t *data)
     }
     else
     {
-        pr_err("[PS][CM36283 OK]%s: _cm36283_I2C_Read_Word OK 0x%x\n",__func__, *data);
+        D("[PS][CM36283 OK]%s: _cm36283_I2C_Read_Word OK 0x%x\n",__func__, *data);
     }
     
     return ret;
@@ -484,14 +490,14 @@ static int als_power(int enable)
 	
 
 	if (enable) {
-		printk("[CM36283] REGULATOR_SET_OPTIMUM_MODE\n");
+		D("[CM36283] REGULATOR_SET_OPTIMUM_MODE\n");
 		rc = regulator_set_optimum_mode(vreg_L9, 195);
 		if (rc < 0) {
 			pr_err("[DISPLAY]set_optimum_mode vreg_L9 failed, rc=%d\n", rc);
 			return -EINVAL;
 		}
 	} else {
-		printk("[CM36283] REGULATOR_DISABLE\n");
+		D("[CM36283] REGULATOR_DISABLE\n");
 		rc = regulator_set_optimum_mode(vreg_L9, 0);
 		if (rc < 0) {
 			pr_err("[CM36283]set_optimum_mode vreg_L9 failed, rc=%d\n", rc);

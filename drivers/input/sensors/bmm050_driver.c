@@ -150,7 +150,7 @@ static int bmm050_power_control(struct bmm_client_data *bmm050,int onoff)
         return -ENODEV;
     }
 
-    PINFO( "state = %d.",onoff);
+    PDEBUG( "state = %d.",onoff);
     if(onoff)
     {
         rc = regulator_set_optimum_mode(bmm050->vreg_l9, 180000);
