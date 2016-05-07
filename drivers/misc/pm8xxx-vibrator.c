@@ -46,10 +46,6 @@ struct pm8xxx_vib {
 
 static struct pm8xxx_vib *vib_dev;
 
-/*PERI-AH-VIBRATOR_Add_level_file_node-00+[ */
-int vib_Level;
-/*PERI-AH-VIBRATOR_Add_level_file_node-00+] */
-
 int pm8xxx_vibrator_config(struct pm8xxx_vib_config *vib_config)
 {
 	u8 reg = 0;
@@ -206,8 +202,12 @@ static enum hrtimer_restart pm8xxx_vib_timer_func(struct hrtimer *timer)
 static ssize_t vib_level_show(struct device *dev,
 				    struct device_attribute *attr, char *buf)
 {
-	dev_info(dev, "vib_level_show %d.\n", vib_Level);
-	return snprintf(buf, PAGE_SIZE, "%d\n", vib_Level);
+	struct timed_output_dev *tdev = dev_get_drvdata(dev);
+	struct pm8xxx_vib *vib = container_of(tdev, struct pm8xxx_vib,
+					      timed_dev);
+
+	dev_info(dev, "vib_level_show %d.\n", vib->level);
+	return snprintf(buf, PAGE_SIZE, "%d\n", vib->level);
 }
 
 static ssize_t vib_level_store(struct device *dev,
