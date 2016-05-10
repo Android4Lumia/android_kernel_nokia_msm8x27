@@ -1007,7 +1007,7 @@ static void __zram_make_request(struct zram *zram, struct bio *bio)
 			if (zram_bvec_rw(zram, &bv, index + 1, 0, rw) < 0)
 				goto out;
 		} else
-			if (zram_bvec_rw(zram, &bvec, index, offset, rw) < 0)
+			if (zram_bvec_rw(zram, bvec, index, offset, rw) < 0)
 				goto out;
 
 		update_position(&index, &offset, bvec);
@@ -1031,8 +1031,8 @@ static void zram_make_request(struct request_queue *queue, struct bio *bio)
 	if (unlikely(!zram_meta_get(zram)))
 		goto error;
 
-	if (!valid_io_request(zram, bio->bi_iter.bi_sector,
-					bio->bi_iter.bi_size)) {
+	if (!valid_io_request(zram, bio->bi_sector,
+					bio->bi_size)) {
 		atomic64_inc(&zram->stats.invalid_io);
 		goto put_zram;
 	}
