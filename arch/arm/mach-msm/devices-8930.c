@@ -1188,6 +1188,7 @@ struct msm_iommu_domain_name msm8930_iommu_ctx_names[] = {
 		.name = "ijpeg_dst",
 		.domain = CAMERA_DOMAIN,
 	},
+#if 0
 	/* Camera */
 	{
 		.name = "jpegd_src",
@@ -1198,6 +1199,7 @@ struct msm_iommu_domain_name msm8930_iommu_ctx_names[] = {
 		.name = "jpegd_dst",
 		.domain = CAMERA_DOMAIN,
 	},
+#endif
 	/* Rotator */
 	{
 		.name = "rot_src",
