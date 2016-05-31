@@ -183,18 +183,11 @@ static unsigned long highmem_dirtyable_memory(unsigned long total)
 	unsigned long x = 0;
 
 	for_each_node_state(node, N_HIGH_MEMORY) {
-		unsigned long nr_pages;
 		struct zone *z =
 			&NODE_DATA(node)->node_zones[ZONE_HIGHMEM];
 
-		nr_pages = zone_page_state(z, NR_FREE_PAGES) +
-		  zone_reclaimable_pages(z);
-		/*
-		 * make sure that the number of pages for this node
-		 * is never "negative".
-		 */
-		nr_pages -= min(nr_pages, z->dirty_balance_reserve);
-		x += nr_pages;
+		x += zone_page_state(z, NR_FREE_PAGES) +
+		     zone_reclaimable_pages(z) - z->dirty_balance_reserve;
 	}
 	/*
 	 * Unreclaimable memory (kernel memory or anonymous memory
@@ -207,6 +200,7 @@ static unsigned long highmem_dirtyable_memory(unsigned long total)
 	 */
 	if ((long)x < 0)
 		x = 0;
+
 	/*
 	 * Make sure that the number of highmem pages is never larger
 	 * than the number of the total dirtyable memory. This can only
@@ -229,11 +223,11 @@ unsigned long global_dirtyable_memory(void)
 {
 	unsigned long x;
 
-    x = global_page_state(NR_FREE_PAGES) + global_reclaimable_pages();
-    x -= min(x, dirty_balance_reserve);
+	x = global_page_state(NR_FREE_PAGES) + global_reclaimable_pages();
+	x -= min(x, dirty_balance_reserve);
 
 	if (!vm_highmem_is_dirtyable)
-		x -= min(x, highmem_dirtyable_memory(x));
+		x -= highmem_dirtyable_memory(x);
 
 	return x + 1;	/* Ensure that we never return 0 */
 }
