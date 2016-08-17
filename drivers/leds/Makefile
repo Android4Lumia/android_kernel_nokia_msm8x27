@@ -66,7 +66,3 @@ obj-$(CONFIG_LEDS_TRIGGER_BACKLIGHT)	+= ledtrig-backlight.o
 obj-$(CONFIG_LEDS_TRIGGER_GPIO)		+= ledtrig-gpio.o
 obj-$(CONFIG_LEDS_TRIGGER_DEFAULT_ON)	+= ledtrig-default-on.o
 obj-$(CONFIG_LEDS_TRIGGER_SLEEP)	+= ledtrig-sleep.o
-#MTD-SW3-PERIPHERAL-BJ-LED_Porting-00+{
-obj-$(CONFIG_FIH_PWM_LED) += fih_pwm_lib.o
-obj-$(CONFIG_FIH_PWM_LED) += fih_led.o
-#MTD-SW3-PERIPHERAL-BJ-LED_Porting-00+}

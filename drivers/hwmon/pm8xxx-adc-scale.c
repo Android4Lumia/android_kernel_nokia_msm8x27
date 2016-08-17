@@ -15,8 +15,6 @@
 #include <linux/err.h>
 #include <linux/module.h>
 #include <linux/mfd/pm8xxx/pm8xxx-adc.h>
-#include <linux/mfd/pm8xxx/pm8921-charger.h>
-#include <linux/fih_hw_info.h>
 #define KELVINMIL_DEGMIL	273160
 
 /* Units for temperature below (on x axis) is in 0.1DegC as
@@ -149,130 +147,6 @@ static struct pm8xxx_adc_map_pt adcmap_btm_threshold[] = {
 	{-180,	880},
 	{-190,	887},
 	{-200,	894}
-};
-
-static struct pm8xxx_adc_map_pt adcmap_btm_threshold_pre_ap[] = {
-	{1000, 498},
-	{990, 500},
-	{980, 502},
-	{970, 504},
-	{960, 507},
-	{950, 509},
-	{940, 511},
-	{930, 513},
-	{920, 516},
-	{910, 518},
-	{900, 521},
-	{890, 524},
-	{880, 526},
-	{870, 529},
-	{860, 532},
-	{850, 535},
-	{840, 538},
-	{830, 541},
-	{820, 545},
-	{810, 548},
-	{800, 551},
-	{790, 555},
-	{780, 559},
-	{770, 562},
-	{760, 566},
-	{750, 570},
-	{740, 575},
-	{730, 579},
-	{720, 583},
-	{710, 588},
-	{700, 592},
-	{690, 597},
-	{680, 602},
-	{670, 607},
-	{660, 612},
-	{650, 618},
-	{640, 623},
-	{630, 629},
-	{620, 635},
-	{610, 641},
-	{600, 647},
-	{590, 653},
-	{580, 660},
-	{570, 666},
-	{560, 673},
-	{550, 680},
-	{540, 687},
-	{530, 694},
-	{520, 702},
-	{510, 710},
-	{500, 717},
-	{490, 725},
-	{480, 733},
-	{470, 742},
-	{460, 750},
-	{450, 759},
-	{440, 768},
-	{430, 777},
-	{420, 786},
-	{410, 795},
-	{400, 805},
-	{390, 814},
-	{380, 824},
-	{370, 834},
-	{360, 844},
-	{350, 854},
-	{340, 864},
-	{330, 874},
-	{320, 885},
-	{310, 895},
-	{300, 906},
-	{290, 917},
-	{280, 927},
-	{270, 938},
-	{260, 949},
-	{250, 960},
-	{240, 971},
-	{230, 982},
-	{220, 993},
-	{210, 1004},
-	{200, 1014},
-	{190, 1025},
-	{180, 1036},
-	{170, 1047},
-	{160, 1057},
-	{150, 1068},
-	{140, 1078},
-	{130, 1089},
-	{120, 1099},
-	{110, 1109},
-	{100, 1119},
-	{90, 1129},
-	{80, 1139},
-	{70, 1148},
-	{60, 1157},
-	{50, 1167},
-	{40, 1176},
-	{30, 1184},
-	{20, 1193},
-	{10, 1201},
-	{0, 1210},
-	{-10, 1217},
-	{-20, 1225},
-	{-30, 1233},
-	{-40, 1240},
-	{-50, 1247},
-	{-60, 1254},
-	{-70, 1261},
-	{-80, 1267},
-	{-90, 1273},
-	{-100, 1279},
-	{-110, 1285},
-	{-120, 1290},
-	{-130, 1296},
-	{-140, 1301},
-	{-150, 1306},
-	{-160, 1310},
-	{-170, 1315},
-	{-180, 1319},
-	{-190, 1323},
-	{-200, 1327},
 };
 
 static const struct pm8xxx_adc_map_pt adcmap_sys_therm[] = {
@@ -503,8 +377,6 @@ static const struct pm8xxx_adc_map_pt adcmap_ntcg_104ef_104fb[] = {
 	{419,		128000}
 };
 
-extern unsigned int fih_get_product_phase(void);
-
 static int32_t pm8xxx_adc_map_linear(const struct pm8xxx_adc_map_pt *pts,
 		uint32_t tablesize, int32_t input, int64_t *output)
 {
@@ -685,30 +557,15 @@ int32_t pm8xxx_adc_scale_batt_therm(int32_t adc_code,
 		struct pm8xxx_adc_chan_result *adc_chan_result)
 {
 	int64_t bat_voltage = 0;
-	struct pm8xxx_adc_map_pt *adc_map = NULL;
-	uint32_t						adc_map_array_size;
-	unsigned int 					phaseid = 0;
 
 	bat_voltage = pm8xxx_adc_scale_ratiometric_calib(adc_code,
 			adc_properties, chan_properties);
 
 	ext_bat_voltage = bat_voltage;
 
-	if (phaseid == 0)
-		phaseid = fih_get_product_phase();
-
-	if (phaseid <= PHASE_SP) {
-		adc_map = adcmap_btm_threshold;
-		adc_map_array_size = ARRAY_SIZE(adcmap_btm_threshold);
-	}
-	else {
-		adc_map = adcmap_btm_threshold_pre_ap;
-		adc_map_array_size = ARRAY_SIZE(adcmap_btm_threshold_pre_ap);
-	}
-
 	return pm8xxx_adc_map_batt_therm(
-			adc_map,
-			adc_map_array_size,
+			adcmap_btm_threshold,
+			ARRAY_SIZE(adcmap_btm_threshold),
 			bat_voltage,
 			&adc_chan_result->physical);
 }
@@ -841,36 +698,16 @@ int32_t pm8xxx_adc_tdkntcg_therm(int32_t adc_code,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(pm8xxx_adc_tdkntcg_therm);
+
 int32_t pm8xxx_adc_batt_scaler(struct pm8xxx_adc_arb_btm_param *btm_param,
 		const struct pm8xxx_adc_properties *adc_properties,
 		const struct pm8xxx_adc_chan_properties *chan_properties)
 {
 	int rc;
-	struct pm8xxx_adc_map_pt *adc_map = NULL;
-	uint32_t						adc_map_array_size;
-	static unsigned int 			phaseid = 0;
-
-	/*
-	 * this function is called by pm8xxx_adc_btm_configure which to configure 
-	 * PMIC temperature IRQ and callback function, which alien battery
-	 * doesn't need to, so here don't take alien battery into consideration
-	 */
-
-	if (phaseid == 0)
-		phaseid = fih_get_product_phase();
-
-	if (phaseid <= PHASE_SP) {
-		adc_map = adcmap_btm_threshold;
-		adc_map_array_size = ARRAY_SIZE(adcmap_btm_threshold);
-	}
-	else {
-		adc_map = adcmap_btm_threshold_pre_ap;
-		adc_map_array_size = ARRAY_SIZE(adcmap_btm_threshold_pre_ap);
-	}
 
 	rc = pm8xxx_adc_map_linear(
-		adc_map,
-		adc_map_array_size,
+		adcmap_btm_threshold,
+		ARRAY_SIZE(adcmap_btm_threshold),
 		(btm_param->low_thr_temp),
 		&btm_param->low_thr_voltage);
 	if (rc)
@@ -883,8 +720,8 @@ int32_t pm8xxx_adc_batt_scaler(struct pm8xxx_adc_arb_btm_param *btm_param,
 		chan_properties->adc_graph[ADC_CALIB_RATIOMETRIC].adc_gnd;
 
 	rc = pm8xxx_adc_map_linear(
-		adc_map,
-		adc_map_array_size,
+		adcmap_btm_threshold,
+		ARRAY_SIZE(adcmap_btm_threshold),
 		(btm_param->high_thr_temp),
 		&btm_param->high_thr_voltage);
 	if (rc)

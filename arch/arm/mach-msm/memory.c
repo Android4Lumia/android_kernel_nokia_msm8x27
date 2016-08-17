@@ -215,9 +215,6 @@ static void __init adjust_reserve_sizes(void)
 
 	mt = &reserve_info->memtype_reserve_table[0];
 	for (i = 0; i < MEMTYPE_MAX; i++, mt++) {
-		if (i == MEMTYPE_EBI1_FIH) {
-			continue;
-		}
 		if (mt->flags & MEMTYPE_FLAGS_1M_ALIGN)
 			mt->size = (mt->size + SECTION_SIZE - 1) & SECTION_MASK;
 		if (mt->size > mt->limit) {
@@ -360,7 +357,6 @@ static char * const memtype_names[] = {
 	[MEMTYPE_SMI]	= "SMI",
 	[MEMTYPE_EBI0] = "EBI0",
 	[MEMTYPE_EBI1] = "EBI1",
-	[MEMTYPE_EBI1_FIH] = "EBI1_FIH",
 };
 
 int msm_get_memory_type_from_name(const char *memtype_name)

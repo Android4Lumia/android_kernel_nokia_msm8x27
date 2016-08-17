@@ -34,7 +34,6 @@
 #include <mach/scm.h>
 #include "msm_watchdog.h"
 #include "timer.h"
-#include <linux/fih_sw_info.h> //MTD-KERNEL-DL-POC-00
 
 #define WDT0_RST	0x38
 #define WDT0_EN		0x40
@@ -54,14 +53,6 @@
 void *lge_error_handler_cookie_addr;
 static int ssr_magic_number = 0;
 #endif
-
-//CORE-DL-FOTA-00 +[
-#define CONFIG_WARMBOOT_FOTA 0x6F656D46
-#define CONFIG_WARMBOOT_S1   0x6F656D53
-//CORE-DL-FOTA-00 +]
-
-
-extern unsigned int debug_ramdump_to_sdcard_enable;/*CORE-HC-RAMDUMP-00+*/
 
 static int restart_mode;
 void *restart_reason;
@@ -140,20 +131,6 @@ void msm_set_restart_mode(int mode)
 #endif
 }
 EXPORT_SYMBOL(msm_set_restart_mode);
-
-//CORE-DL-AdbWriteRestartReason-00 +[
-static int lights_on;
-u32 reboot_reason;
-void msm_write_restart_reason(u32 reason)
-{
-	reboot_reason = reason;
-	lights_on = 1;
-
-	pr_err("ADB write 0x%08x into restart_reason\n", reboot_reason);
-	__raw_writel(reboot_reason, restart_reason);
-}
-EXPORT_SYMBOL(msm_write_restart_reason);
-//CORE-DL-AdbWriteRestartReason-00 +]
 
 static void __msm_power_off(int lower_pshold)
 {
@@ -255,11 +232,8 @@ void set_kernel_crash_magic_number(void)
 }
 #endif /* CONFIG_LGE_CRASH_HANDLER */
 
-void * get_hw_wd_virt_addr(void); //CORE-DL-MR2Porting-00+
-
 void msm_restart(char mode, const char *cmd)
 {
-unsigned int *fih_hw_wd_ptr; //CORE-DL-MR2Porting-00+
 
 #ifdef CONFIG_MSM_DLOAD_MODE
 
@@ -292,41 +266,16 @@ unsigned int *fih_hw_wd_ptr; //CORE-DL-MR2Porting-00+
 			__raw_writel(0x77665500, restart_reason);
 		} else if (!strncmp(cmd, "recovery", 8)) {
 			__raw_writel(0x77665502, restart_reason);
-		} else if (!strcmp(cmd, "rtc")) {
-			__raw_writel(0x77665503, restart_reason);
 		} else if (!strncmp(cmd, "oem-", 4)) {
 			unsigned long code;
 			code = simple_strtoul(cmd + 4, NULL, 16) & 0xff;
 			__raw_writel(0x6f656d00 | code, restart_reason);
-//CORE-DL-FOTA-00 +[
-		} else if (!strncmp(cmd, "oemS", 4)) {
-			__raw_writel(CONFIG_WARMBOOT_S1, restart_reason);
-		} else if (!strncmp(cmd, "oemF", 4)) {
-			__raw_writel(CONFIG_WARMBOOT_FOTA , restart_reason);
-//CORE-DL-FOTA-00 +]
 		} else {
 			__raw_writel(0x77665501, restart_reason);
 		}
 	} else {
 		__raw_writel(0x77665501, restart_reason);
 	}
-
-//CORE-DL-AdbWriteRestartReason-00 +[
-	if (lights_on == 1)
-		__raw_writel(reboot_reason, restart_reason);
-//CORE-DL-AdbWriteRestartReason-00 +]
-
-//CORE-DL-MR2Porting-00 +]
-	if ((in_panic == 1) && (debug_ramdump_to_sdcard_enable == 1)) {
-		//Write restart_reason as REBOOT_CRASHDUMP_PANIC
-		__raw_writel(0xC0DEDEAD, restart_reason);
-	}
-
-	fih_hw_wd_ptr = (unsigned int*) get_hw_wd_virt_addr();
-	if (fih_hw_wd_ptr != NULL)
-		*fih_hw_wd_ptr = MTD_PWR_ON_EVENT_CLEAN_DATA;
-//CORE-DL-MR2Porting-00 +]
-
 #ifdef CONFIG_LGE_CRASH_HANDLER
 	if (in_panic == 1)
 		set_kernel_crash_magic_number();

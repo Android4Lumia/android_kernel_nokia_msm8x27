@@ -123,12 +123,10 @@ static struct sysrq_key_op sysrq_unraw_op = {
 #define sysrq_unraw_op (*(struct sysrq_key_op *)NULL)
 #endif /* CONFIG_VT */
 
-extern int send_mtbf; /* determine if send mtbf report */ //CORE-DL-IgnoreSysrqTriggerForMtbf-00
 static void sysrq_handle_crash(int key)
 {
 	char *killer = NULL;
 
-	send_mtbf = 0; //CORE-DL-IgnoreSysrqTriggerForMtbf-00
 	panic_on_oops = 1;	/* force panic */
 	wmb();
 	*killer = 1;

@@ -146,6 +146,15 @@ struct pm8xxx_mpp_init {
 
 /* Initial PM8038 GPIO configurations */
 static struct pm8xxx_gpio_init pm8038_gpios[] __initdata = {
+	/* keys GPIOs */
+	PM8038_GPIO_INPUT(3, PM_GPIO_PULL_UP_30),
+	PM8038_GPIO_INPUT(8, PM_GPIO_PULL_UP_30),
+	PM8038_GPIO_INPUT(10, PM_GPIO_PULL_UP_30),
+	PM8038_GPIO_INPUT(11, PM_GPIO_PULL_UP_30),
+	/* haptics gpio */
+	PM8038_GPIO_OUTPUT_FUNC(7, 0, PM_GPIO_FUNC_1),
+	/* MHL PWR EN */
+	PM8038_GPIO_OUTPUT_VIN(5, 1, PM8038_GPIO_VIN_VPH),
 };
 
 /* Initial PM8038 MPP configurations */
@@ -351,7 +360,6 @@ static struct led_info pm8038_led_info[] = {
 		.default_trigger	= "bkl_trigger",
 	},
 #if 0
-
 	[1] = {
 		.name			= "led:rgb_red",
 		.default_trigger	= "battery-charging",

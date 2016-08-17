@@ -30,6 +30,8 @@
 #define CMI_PANEL_V2_ID 0x47
 #define CMI_PANEL_V3_ID 0x48
 
+#define RACE_PANEL_ID 0xe3
+
 static struct dsi_buf orise_tx_buf;
 static struct dsi_buf orise_rx_buf;
 static int mipi_orise_lcd_init(void);
@@ -183,9 +185,7 @@ static char exit_sleep[2] = {0x11, 0x00}; /* DTYPE_DCS_WRITE */
 static char display_off[2] = {0x28, 0x00}; /* DTYPE_DCS_WRITE */
 static char display_on[2] = {0x29, 0x00}; /* DTYPE_DCS_WRITE */
 static char write_ctrl_display[2] = {0x53, 0x24}; /* DTYPE_DCS_WRITE1 */
-#ifdef CONFIG_FIH_SW_LCM_BC
-static char write_display_brightness[2] = {0x51, 0xFF}; /* DTYPE_DCS_WRITE1 */
-#endif
+static char write_display_brightness[2] = {0x51, 0x80}; /* DTYPE_DCS_WRITE1 */
 static char orise_manufacture_idDA[2] = {0xDA, 0x00}; /* DTYPE_DCS_READ */
 
 static char truly_cmd2_enable_offset[2] = {0x00, 0x00}; /* DTYPE_GEN_WRITE1 */
@@ -455,18 +455,12 @@ static char truly_panel_settings13_offset[2] = {0x00, 0xCC}; /* DTYPE_GEN_WRITE1
 static char truly_panel_settings13[4] = {0xCC, 0x10, 0x0E, 0x0B}; /* DTYPE_GEN_LWRITE */
 static char truly_panel_settings14_offset[2] = {0x00, 0xD0}; /* DTYPE_GEN_WRITE1 */
 static char truly_panel_settings14[3] = {0xCC, 0x09, 0x01}; /* DTYPE_GEN_LWRITE */
-#ifdef CONFIG_FIH_SW_LCM_BC
 static char truly_pwm_1_offset[2] = {0x00, 0xB4}; /* DTYPE_GEN_WRITE1 */
 static char truly_pwm_1[2] = {0xC6, 0x12}; /* DTYPE_GEN_WRITE1 */
 static char truly_pwm_2_offset[2] = {0x00, 0xB1}; /* DTYPE_GEN_WRITE1 */
 static char truly_pwm_2[2] = {0xC6, 0x0A}; /* DTYPE_GEN_WRITE1 */
-#endif
 static char truly_bc_offset[2] = {0x00, 0x00}; /* DTYPE_GEN_WRITE1 */
-#ifdef CONFIG_FIH_SW_LCM_BC
 static char truly_bc[2] = {0x53, 0x2C}; /* DTYPE_GEN_WRITE1 */
-#else
-static char truly_bc[2] = {0x53, 0x00}; /* DTYPE_GEN_WRITE1 */
-#endif
 static char truly_tear_on_offset[2] = {0x00, 0x00}; /* DTYPE_GEN_WRITE1 */
 static char truly_tear_on[2] = {0x35, 0x00};
 static char truly_sleep_out_offset[2] = {0x00, 0x00}; /* DTYPE_GEN_WRITE1 */
@@ -634,12 +628,10 @@ static struct dsi_cmd_desc orise_truly_on_cmds[] = {
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(truly_cmd2_disable), truly_cmd2_disable},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_orise_cmd2_disable_offset), truly_orise_cmd2_disable_offset},
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(truly_orise_cmd2_disable), truly_orise_cmd2_disable},
-#ifdef CONFIG_FIH_SW_LCM_BC
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_1_offset), truly_pwm_1_offset},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_1), truly_pwm_1},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_2_offset), truly_pwm_2_offset},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_2), truly_pwm_2},
-#endif
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_bc_offset), truly_bc_offset},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(truly_bc), truly_bc},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_tear_on_offset), truly_tear_on_offset},
@@ -648,9 +640,7 @@ static struct dsi_cmd_desc orise_truly_on_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 120, sizeof(truly_sleep_out), truly_sleep_out},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_display_on_offset), truly_display_on_offset},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(truly_display_on), truly_display_on},
-#ifdef CONFIG_FIH_SW_LCM_BC
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,	sizeof(write_display_brightness), write_display_brightness}
-#endif
 };
 /* LCM ID 0x49*/
 static struct dsi_cmd_desc orise_truly_v3_on_cmds[] = {
@@ -664,12 +654,10 @@ static struct dsi_cmd_desc orise_truly_v3_on_cmds[] = {
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(truly_cmd2_disable), truly_cmd2_disable},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_orise_cmd2_disable_offset), truly_orise_cmd2_disable_offset},
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(truly_orise_cmd2_disable), truly_orise_cmd2_disable},
-#ifdef CONFIG_FIH_SW_LCM_BC
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_1_offset), truly_pwm_1_offset},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_1), truly_pwm_1},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_2_offset), truly_pwm_2_offset},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_2), truly_pwm_2},
-#endif
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_bc_offset), truly_bc_offset},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(truly_bc), truly_bc},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_tear_on_offset), truly_tear_on_offset},
@@ -678,9 +666,7 @@ static struct dsi_cmd_desc orise_truly_v3_on_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 120, sizeof(truly_sleep_out), truly_sleep_out},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_display_on_offset), truly_display_on_offset},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(truly_display_on), truly_display_on},
-#ifdef CONFIG_FIH_SW_LCM_BC
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,	sizeof(write_display_brightness), write_display_brightness}
-#endif
 };
 static struct dsi_cmd_desc orise_truly_v4_on_cmds[] = {
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_cmd2_enable_offset), truly_cmd2_enable_offset},
@@ -703,12 +689,10 @@ static struct dsi_cmd_desc orise_truly_v4_on_cmds[] = {
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(truly_cmd2_disable), truly_cmd2_disable},	
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_orise_cmd2_disable_offset), truly_orise_cmd2_disable_offset},
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(truly_orise_cmd2_disable), truly_orise_cmd2_disable},
-#ifdef CONFIG_FIH_SW_LCM_BC
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_1_offset), truly_pwm_1_offset},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_1), truly_pwm_1},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_2_offset), truly_pwm_2_offset},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_pwm_2), truly_pwm_2},
-#endif
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_bc_offset), truly_bc_offset},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(truly_bc), truly_bc},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_tear_on_offset), truly_tear_on_offset},
@@ -717,9 +701,7 @@ static struct dsi_cmd_desc orise_truly_v4_on_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 120, sizeof(truly_sleep_out), truly_sleep_out},
 	{DTYPE_GEN_WRITE1, 1, 0, 0, 0, sizeof(truly_display_on_offset), truly_display_on_offset},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(truly_display_on), truly_display_on},
-#ifdef CONFIG_FIH_SW_LCM_BC
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,	sizeof(write_display_brightness), write_display_brightness}
-#endif
 };
 
 static struct dsi_cmd_desc orise_auo_video_on_cmds[] = {
@@ -1000,6 +982,38 @@ static struct dsi_cmd_desc x47_orise_cmi_v2_video_on_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 10,
 		sizeof(display_on), display_on}
 };
+/* ----------- [For CMI V2 panel setting End] ----------- */
+/* ----------- [For RACE panel setting Start] ----------- */
+/* Nokia RACE WVGA DSI CMD Panel (480x800x24) START */
+static char race_set_pixel_format[2] = {0x3A, 0x70};	/* DTYPE_DCS_WRITE1 */
+static char race_ctrl_display[2] = {0x53, 0x2C};	/* DTYPE_DCS_WRITE1 */
+static char race_cabc_on[2] = {0x55, 0x01};		/* DTYPE_DCS_WRITE1 */
+static char race_cabc_off[2] = {0x55, 0x00};		/* DTYPE_DCS_WRITE1 */
+
+static char race_unknown_cmd[2] = {0xff, 0x78};		/* DTYPE_GEN_LWRITE? */
+
+
+static struct dsi_cmd_desc orise_race_video_on_cmds[] = {
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(exit_sleep), exit_sleep},
+	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(race_unknown_cmd), race_unknown_cmd},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_set_pixel_format), race_set_pixel_format},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_ctrl_display), race_ctrl_display},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(write_display_brightness), write_display_brightness},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_cabc_on), race_cabc_on},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_set_pixel_format), race_set_pixel_format},
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(display_on), display_on},
+};
+
+static struct dsi_cmd_desc orise_race_video_off_cmds[] = {
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_cabc_off), race_cabc_off},
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(display_off), display_off},
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(enter_sleep), enter_sleep},
+};
+/* ----------- [For RACE panel setting End] ----------- */
+
+static struct dsi_cmd_desc orise_video_bkl_cmds[] = {
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 1, sizeof(write_display_brightness), write_display_brightness}
+};
 
 static struct dsi_cmd_desc x47_orise_cmi_video_off_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 40,
@@ -1007,10 +1021,9 @@ static struct dsi_cmd_desc x47_orise_cmi_video_off_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 120,
 		sizeof(enter_sleep), enter_sleep}
 };
-/* ----------- [For CMI V2 panel setting End] ----------- */
 static struct dsi_cmd_desc orise_ReadDA = {
-	DTYPE_DCS_READ, 1, 0, 1, 20, sizeof(orise_manufacture_idDA),
-										orise_manufacture_idDA};
+	DTYPE_DCS_READ, 1, 0, 1, 20, sizeof(orise_manufacture_idDA), orise_manufacture_idDA
+};
 static int mipi_orise_manufacture_id(struct msm_fb_data_type *mfd)
 {
 	char retDA = 0;
@@ -1077,6 +1090,10 @@ static int mipi_orise_lcd_on(struct platform_device *pdev)
 			rc = mipi_dsi_cmds_tx(&orise_tx_buf, x47_orise_cmi_video_on_cmds,
 					ARRAY_SIZE(x47_orise_cmi_video_on_cmds));
 			break;
+		case RACE_PANEL_ID:
+			rc = mipi_dsi_cmds_tx(&orise_tx_buf, orise_race_video_on_cmds,
+					ARRAY_SIZE(orise_race_video_on_cmds));
+			break;
 		default:
 			printk(KERN_ERR "[DISPLAY] illegal PID <0x%02x>\n", gPanelModel);
 			break;
@@ -1114,9 +1131,12 @@ static int mipi_orise_lcd_off(struct platform_device *pdev)
 	if (gPanelModel == CMI_PANEL_V2_ID)
 		mipi_dsi_cmds_tx(&orise_tx_buf, x47_orise_cmi_video_off_cmds,
 				ARRAY_SIZE(x47_orise_cmi_video_off_cmds));
+	else if(gPanelModel == RACE_PANEL_ID)
+		mipi_dsi_cmds_tx(&orise_tx_buf, orise_race_video_off_cmds,
+				ARRAY_SIZE(orise_race_video_off_cmds));
 	else
-	mipi_dsi_cmds_tx(&orise_tx_buf, orise_video_off_cmds,
-			ARRAY_SIZE(orise_video_off_cmds));
+		mipi_dsi_cmds_tx(&orise_tx_buf, orise_video_off_cmds,
+				ARRAY_SIZE(orise_video_off_cmds));
 	mipi_set_tx_power_mode(1);
 
 	display_initialize = 0;
@@ -1124,13 +1144,14 @@ static int mipi_orise_lcd_off(struct platform_device *pdev)
 	return 0;
 }
 
-extern int fih_wled_set(int level);
 static void mipi_orise_lcd_backlight(struct msm_fb_data_type *mfd)
 {
+	printk(KERN_ALERT "[DISPLAY] Enter %s(%i)\n", __func__, mfd->bl_level);
+
 	if (unlikely(!display_initialize))
 		return;
-#ifdef CONFIG_FIH_SW_LCM_BC
-	write_display_brightness[1] = BKL_PWM[mfd->bl_level];  /* Duty_Cycle */
+
+	write_display_brightness[1] = mfd->bl_level;
 
 	down(&mfd->dma->mutex);
 	mipi_set_tx_power_mode(0);
@@ -1138,10 +1159,8 @@ static void mipi_orise_lcd_backlight(struct msm_fb_data_type *mfd)
 			ARRAY_SIZE(orise_video_bkl_cmds));
 	mipi_set_tx_power_mode(1);
 	up(&mfd->dma->mutex);
-#else
-	fih_wled_set(mfd->bl_level);
-#endif
 }
+
 static int __devinit mipi_orise_lcd_probe(struct platform_device *pdev)
 {
 	printk(KERN_ALERT "[DISPLAY] Enter %s\n", __func__);

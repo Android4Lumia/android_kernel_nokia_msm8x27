@@ -43,12 +43,6 @@ enum {
 /* number of ms to wait between checking for new messages in the RPM log */
 #define RECHECK_TIME (50)
 
-//MTD-SD1-Power-BH-SuspendLog-01+[
-rpm_suspend_log *suspend_log;
-
-EXPORT_SYMBOL(suspend_log);
-//MTD-SD1-Power-BH-SuspendLog-01+]
-
 struct msm_rpm_log_buffer {
 	char *data;
 	u32 len;
@@ -317,16 +311,6 @@ static int __devinit msm_rpm_log_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, dent);
-
-//MTD-SD1-Power-BH-SuspendLog-01+[
-	suspend_log = ioremap(SUSPEND_LOG_PHY_ADDR, sizeof(rpm_suspend_log));
-	if (!suspend_log) {
-		pr_err("%s: ERROR could not ioremap suspend log: start=%p, len=%u\n",
-			__func__, (void *)SUSPEND_LOG_PHY_ADDR, sizeof(rpm_suspend_log));
-		return -EBUSY;
-	}
-	memset(suspend_log, 0, sizeof(rpm_suspend_log));
-//MTD-SD1-Power-BH-SuspendLog-01+]
 
 	pr_notice("%s: OK\n", __func__);
 	return 0;

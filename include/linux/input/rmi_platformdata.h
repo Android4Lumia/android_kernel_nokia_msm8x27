@@ -122,9 +122,4 @@ struct rmi_f19_functiondata {
 	struct rmi_button_map *button_map;
 };
 
-struct syna_gpio_data {
-	u16 gpio_number;
-	char* gpio_name;
-};
-
 #endif

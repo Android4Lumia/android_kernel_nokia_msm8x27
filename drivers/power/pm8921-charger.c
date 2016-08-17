@@ -28,7 +28,6 @@
 #include <linux/workqueue.h>
 #include <linux/debugfs.h>
 #include <linux/slab.h>
-#include <linux/fih_sw_info.h>
 #include <linux/mfd/pm8xxx/batt-alarm.h>
 #include <linux/ratelimit.h>
 #include <linux/mfd/pm8xxx/misc.h>
@@ -2074,28 +2073,6 @@ static int set_fake_temp_param(const char *val, struct kernel_param *kp)
 }
 module_param_call(fake_temp, set_fake_temp_param, param_get_uint,
 					&fake_temp, 0644);
-
-//CORE-DL-AdbWriteRestartReason-00 +[
-u32 reason;
-void msm_write_restart_reason(u32 reason);
-static int write_restart_reason(const char *val, struct kernel_param *kp)
-{
-	int ret;
-
-	ret = param_set_uint(val, kp);
-	if (ret) {
-		pr_err("error setting value %d\n", ret);
-		return ret;
-	}
-
-	if (reason)
-		msm_write_restart_reason(reason);
-
-	return 0;
-}
-module_param_call(restart_reason, write_restart_reason, NULL,
-					&reason, 0644);
-//CORE-DL-AdbWriteRestartReason-00 +]
 
 #define MAN_CP_100 95
 static int update_soc(struct pm8921_chg_chip *chip)
@@ -5243,8 +5220,6 @@ static ssize_t chg_is_enter_power_off_charging(struct device *dev,
 	bool power_off_charging = is_power_off_charging();
 
 	if (power_off_charging) {
-		pr_info("Write PWR_OFF_CHG_REBOOT as POC\n");
-		write_pwron_cause(PWR_OFF_CHG_REBOOT);
 		return snprintf(buf, PAGE_SIZE, "1\n");
 	} else {
 		return snprintf(buf, PAGE_SIZE, "0\n");

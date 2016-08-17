@@ -219,13 +219,7 @@ static const struct file_operations list_rates_fops = {
 };
 
 static struct dentry *debugfs_base;
-/*KERNEL-SC-SUSPEND_RESUME_WAKELOCK_LOG-01*[*/
-#ifdef CONFIG_FIH_SUSPEND_RESUME_LOG
-static u32 debug_suspend = 1;//default show clock info when suspend
-#else
 static u32 debug_suspend;
-#endif
-/*KERNEL-SC-SUSPEND_RESUME_WAKELOCK_LOG-01*]*/
 
 struct clk_table {
 	struct list_head node;

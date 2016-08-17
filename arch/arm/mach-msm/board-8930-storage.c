@@ -161,13 +161,13 @@ static struct msm_mmc_pad_pull sdc3_pad_pull_off_cfg[] = {
 	 * see transitions (1 -> 0 and 0 -> 1) on card detection line,
 	 * which would result in false card detection interrupts.
 	 */
-	{TLMM_PULL_SDC3_CMD, GPIO_CFG_PULL_DOWN},/*BSP-ELuo-Power_Saving-00*/
+	{TLMM_PULL_SDC3_CMD, GPIO_CFG_PULL_UP},
 	/*
 	 * Keeping DATA lines status to PULL UP will make sure that
 	 * there is no current leak during sleep if external pull up
 	 * is connected to DATA lines.
 	 */
-	{TLMM_PULL_SDC3_DATA, GPIO_CFG_PULL_DOWN}/*BSP-ELuo-Power_Saving-00*/
+	{TLMM_PULL_SDC3_DATA, GPIO_CFG_PULL_UP}
 };
 
 static struct msm_mmc_pad_pull_data mmc_pad_pull_data[MAX_SDCC_CONTROLLER] = {
@@ -268,10 +268,8 @@ static struct mmc_platform_data msm8960_sdc3_data = {
 	.pin_data	= &mmc_slot_pin_data[SDCC3],
 /*TODO: Insert right replacement for PM8038 */
 #ifndef MSM8930_PHASE_2
-	/*.status_gpio	= PM8921_GPIO_PM_TO_SYS(26),*/
-	/*.status_irq	= PM8921_GPIO_IRQ(PM8921_IRQ_BASE, 26),*/
-	.status_gpio	= 94,/*FIH-SW3-ELuo-Card_detect-00*/
-	.status_irq	= MSM_GPIO_TO_INT(94),/*FIH-SW3-ELuo-Card_detect-00*/	
+	.status_gpio	= PM8921_GPIO_PM_TO_SYS(26),
+	.status_irq	= PM8921_GPIO_IRQ(PM8921_IRQ_BASE, 26),
 #else
 	.status_gpio	= 94,
 	.status_irq	= MSM_GPIO_TO_INT(94),
@@ -279,17 +277,9 @@ static struct mmc_platform_data msm8960_sdc3_data = {
 	.irq_flags	= IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
 	.is_status_gpio_active_low = true,
 	.xpc_cap	= 1,
-	
-	/*BSP-Eluo-Remove-SDR104_Support +[*/	
-	/*
 	.uhs_caps	= (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
 			MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_DDR50 |
-			MMC_CAP_UHS_SDR104| MMC_CAP_MAX_CURRENT_800),
-	*/			
-	.uhs_caps	= (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
-			MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_DDR50 |
-			MMC_CAP_MAX_CURRENT_800),
-	/*BSP-Eluo-Remove-SDR104_Support ]+*/			
+			MMC_CAP_UHS_SDR104 | MMC_CAP_MAX_CURRENT_800),
 	.mpm_sdiowakeup_int = MSM_MPM_PIN_SDC3_DAT1,
 	.msm_bus_voting_data = &sps_to_ddr_bus_voting_data,
 };

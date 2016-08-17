@@ -54,11 +54,6 @@
 #include "spm.h"
 #include "timer.h"
 #include "pm-boot.h"
-//MTD-SD1-Power-BH-SuspendLog-01+[
-#include "rpm_log.h"
-extern rpm_suspend_log *suspend_log;
-uint32_t limit_time;
-//MTD-SD1-Power-BH-SuspendLog-01+]
 #include <mach/event_timer.h>
 #include <linux/cpu_pm.h>
 
@@ -76,27 +71,13 @@ enum {
 	MSM_PM_DEBUG_IDLE = BIT(6),
 	MSM_PM_DEBUG_IDLE_LIMITS = BIT(7),
 	MSM_PM_DEBUG_HOTPLUG = BIT(8),
-	MSM_PM_DEBUG_RPM_SUSPEND_LOG = BIT(9), //MTD-SD1-Power-BH-SuspendLog-01+
-	MSM_PM_DEBUG_RPM_IDLE_LOG = BIT(10), //CORE-BH-SuspendLog-03+
-	MSM_PM_DEBUG_RPM_IDLE_LOG_ONLY_XOSD_VDDMIN = BIT(11), //CORE-BH-SuspendLog-07+
-	MSM_PM_DEBUG_NOT_MPM_DETECTION = BIT(12), //CORE-BH-SuspendLog-08+
 };
 
-static int msm_pm_debug_mask = 0x201; //MTD-SD1-Power-BH-SuspendLog-01*
+static int msm_pm_debug_mask = 1;
 module_param_named(
 	debug_mask, msm_pm_debug_mask, int, S_IRUGO | S_IWUSR | S_IWGRP
 );
-
-//CORE-BH-SuspendLog-08+[
-uint not_mpm_duration_threshold = 1800;
-
-module_param_named(
-	not_mpm_duration, not_mpm_duration_threshold, uint, S_IRUGO | S_IWUSR | S_IWGRP
-);
- //CORE-BH-SuspendLog-08+]
 static int msm_pm_retention_tz_call;
-
-extern int msm_show_resume_irq_mask; //MTD-SD1-Power-BH-SuspendLog-01+
 
 /******************************************************************************
  * Sleep Modes and Parameters
@@ -141,167 +122,6 @@ static char *msm_pm_sleep_mode_labels[MSM_PM_SLEEP_MODE_NR] = {
 static struct hrtimer pm_hrtimer;
 static struct msm_pm_sleep_ops pm_sleep_ops;
 static struct msm_pm_sleep_status_data *msm_pm_slp_sts;
-
-//MTD-SD1-Power-BH-SuspendLog-01+[
-static char *mpm_ints_str[64] = {
-	"timetick",
-	"touchscreen pen irq (gpio 46)",
-	"spare (reserved)",
-	"rpm grouped interrupt",
-	"PM8921 secure irq (gpio 103)",
-	"PM8921 user irq (gpio 104)",
-	"PM8921 modem irq (gpio 105)",
-	"PM8018 secure irq (gpio 106)",
-	"PM8018 user irq (gpio 107)",
-	"gsbi 1_2 uart rx data (gpio 7)",
-	"gsbi 2_2 uart rx data (gpio 11)",
-	"gsbi 3_2 uart rx data (gpio 15)",
-	"gsbi 4_2 uart rx data (gpio 19)",
-	"gsbi 5_2 uart rx data (gpio 23)",
-	"gsbi 6_2 uart rx data (gpio 27)",
-	"gsbi 7_2 uart rx data (gpio 31)",
-	"gsbi 8_2 uart rx data (gpio 35)",
-	"sdc1 dat1",
-	"sdc1 dat3",
-	"sdc2 dat1 (gpio 90)",
-	"sdc2 dat3 (gpio 92)",
-	"sdc3 dat1",
-	"sdc3 dat3",
-	"sdc4 dat1 (gpio 85)",
-	"sdc4 dat3 (gpio 83)",
-	"usb phy irq0 (usb2_phy_id)",
-	"svideo load present wakeup",
-	"hdmi rcv det",
-	"srst_n",
-	"gp_crci_trigger (gpio 10)",
-	"hdmi hot plut detect",
-	"sdc5 dat1 (gpio 81)",
-	"sdc5 dat3 (gpio 78)",
-	"gsbi 9_2 uart rx data (gpio 94)",
-	"gsbi 10_2 uart rx data (gpio 72)",
-	"gsbi 11_2 uart rx data (gpio 39)",
-	"gsbi 12_2 uart rx data (gpio 43)",
-	"slimbus0_data (gpio 61)",
-	"slimbus1_data (gpio 50)",
-	"slimbus2_data (gpio 42)",
-	"usb phy irq1 (usb2_phy_otgsessvld)",
-	"tabla (gpio 62)",
-	"gpio 76",
-	"gpio 75",
-	"gpio 70",
-	"gpio 69",
-	"gpio 67",
-	"gpio 65",
-	"gpio 58",
-	"gpio 54",
-	"gpio 52",
-	"gpio 49",
-	"gpio 40",
-	"gpio 37",
-	"gpio 24",
-	"gpio 14",
-	"spare (reserved)",
-	"DSPS bringup request",
-	"RIVA bringup request",
-	"Q6FW bringup request",
-	"KPSS0 bringup request",
-	"KPSS1 bringup request",
-	"Q6SW bringup request",
-	"LPASS bringup request",
-};
-
-void show_npa_log(void)
-{
-	int i,j;
-	
-	for (i=0; i<NPA_RES_FILTER_NUM && suspend_log->npa_resource_log[i].name[0] != 0; i++)
-	{
-		printk(KERN_EMERG "[PM] R:\"%s\",%d,%d", suspend_log->npa_resource_log[i].name, suspend_log->npa_resource_log[i].active_state, suspend_log->npa_resource_log[i].request_state);
-		for (j=0; j<NPA_RES_CLIENT_NUM && suspend_log->npa_resource_log[i].client[j].name[0] != 0; j++)
-			printk(" C:\"%s\",0x%x,%d", suspend_log->npa_resource_log[i].client[j].name, suspend_log->npa_resource_log[i].client[j].type, suspend_log->npa_resource_log[i].client[j].request);
-	}
-}
-
-void show_rpm_wakeup_info(void)
-{
-	int i;
-	char tbuf1[50]="";
-	char tbuf2[121]="";
-	char tbuf[20];
-	unsigned tlen;
-	unsigned long long t;
-	unsigned long long t1ms = suspend_log->xo_shutdown_time >> 5; //MTD-SD1-Power-BH-SuspendLog-01+
-	unsigned long long t2ms = suspend_log->vdd_min_time >> 5; //MTD-SD1-Power-BH-SuspendLog-01+
-	
-	printk(KERN_INFO "[PM] NMPM:0x%04X, NMPMPI:0x%08X, UBER:0x%X, LPR:0x%X, XOSDCnt:%u, XOSDTime:%u.%03lu, VddMinCnt:%u, VddMinTime:%u.%03lu VddDig:%dmV WUPI1:0x%08X, WUPI2:0x%08X, ", //CORE-BH-SuspendLog-07*
-			suspend_log->not_mpm_reason, 
-			suspend_log->not_mpm_pending_int, 
-			suspend_log->sleep_uber_state & 0xF,
-			suspend_log->sleep_lpr_state & 0x7,
-			suspend_log->xo_shutdown_count,
-			suspend_log->xo_shutdown_time >> 15,
-			(unsigned long) do_div(t1ms , 1000), //MTD-SD1-Power-BH-SuspendLog-01*
-			suspend_log->vdd_min_count,
-			suspend_log->vdd_min_time >> 15,
-			(unsigned long) do_div(t2ms, 1000), //MTD-SD1-Power-BH-SuspendLog-01*
-			suspend_log->vdd_dig_sleep_voltage_mv, //CORE-BH-SuspendLog-07+
-			suspend_log->mpm_wakeup_pending_int_status1, 
-			suspend_log->mpm_wakeup_pending_int_status2);
-	
-	for (i=0; i<32 && suspend_log->mpm_wakeup_pending_int_status1 != 0; i++)
-	{
-		if (suspend_log->mpm_wakeup_pending_int_status1>>i & 0x1) 
-			printk("%s ",mpm_ints_str[i]);
-	}
-	
-	for (i=0; i<32 && suspend_log->mpm_wakeup_pending_int_status2 != 0; i++)
-	{
-		if (suspend_log->mpm_wakeup_pending_int_status2>>i & 0x1) 
-			printk("%s ",mpm_ints_str[i+32]);
-	}
-	
-	for (i=1; i<RPM_MASTER_NUM; i++)
-	{
-		snprintf(tbuf, sizeof(tbuf), "%d=%u, ", i, suspend_log->master_bringup_count[i]); //MTD-SD1-Power-BH-SuspendLog-01*
-		strncat(tbuf1, tbuf, sizeof(tbuf1)-strlen(tbuf1)-1); //MTD-SD1-Power-BH-SuspendLog-01*
-	}
-			
-	for (i=1; i<RPM_MASTER_NUM; i++)
-	{
-		//MTD-SD1-Power-BH-SuspendLog-01*[
-		t = suspend_log->master_awake_time[i] >> 5;
-		tlen = snprintf(tbuf, sizeof(tbuf), "%d=%lu.%03lu, ", i, (unsigned long)t/1000, (unsigned long)do_div(t, 1000));
-		strncat(tbuf2, tbuf, sizeof(tbuf2)-strlen(tbuf2)-1);
-		//MTD-SD1-Power-BH-SuspendLog-01*]
-	}
-	
-	printk(KERN_INFO "[PM] Known:0x%X, Idle:0x%X, AwakeCnt:( %s), AwakeTime:( %s)\n", //CORE-BH-SuspendLog-07*
-			suspend_log->sleep_known_masters, 
-			suspend_log->sleep_idle_masters,
-			tbuf1,
-			tbuf2);
-
-	if (suspend_log->not_mpm_reason != NOT_MPM_REASON_ENTER_VDD_MIN) //MTD-SD1-Power-BH-SuspendLog-02*
-		show_npa_log();
-}
-
-void show_apss_wakeup_info(int64_t time)
-{
-	char tbuf[50];
-	unsigned tlen;
-	unsigned long long t;
-	unsigned long nanosec_rem;
-
-	t = time;
-	nanosec_rem = do_div(t, 1000000000);
-	tlen = snprintf(tbuf, sizeof(tbuf), "%lu.%03lu ",
-			(unsigned long) t,
-			nanosec_rem / 1000000); //MTD-SD1-Power-BH-SuspendLog-01*
-				
-	printk(KERN_INFO "[PM] APSS PC:%s\n", tbuf); //CORE-BH-SuspendLog-07*
-}
-//MTD-SD1-Power-BH-SuspendLog-01+]
-
 /*
  * Write out the attribute.
  */
@@ -504,7 +324,7 @@ static int __init msm_pm_mode_sysfs_add(void)
 			goto mode_sysfs_add_exit;
 	}
 
-       ret = 0;
+	ret = 0;
 
 mode_sysfs_add_exit:
 	return ret;
@@ -815,54 +635,8 @@ static bool msm_pm_power_collapse(bool from_idle)
 	if (msm_pm_save_cp15)
 		msm_pm_save_cpu_reg();
 
-        //CORE-BH-SuspendLog-07*[
-	if (likely(from_idle))
-	{
-		if (unlikely(msm_pm_debug_mask & MSM_PM_DEBUG_RPM_IDLE_LOG && msm_pm_debug_mask & MSM_PM_DEBUG_RPM_SUSPEND_LOG))
-			suspend_log->enable_log = 1;
-		else
-			suspend_log->enable_log = 0;
-		
-		suspend_log->not_mpm_detect = 0; //CORE-BH-SuspendLog-08+
-	}
-	else
-		if (msm_pm_debug_mask & MSM_PM_DEBUG_RPM_SUSPEND_LOG)
-		{
-			suspend_log->enable_log = 1;
-			//CORE-BH-SuspendLog-08+[
-			if (msm_pm_debug_mask & MSM_PM_DEBUG_NOT_MPM_DETECTION)
-			{
-				suspend_log->not_mpm_detect = 1; 
-				suspend_log->not_mpm_duration_threshold = not_mpm_duration_threshold * 32768;
-			}
-			else
-				suspend_log->not_mpm_detect = 0;
-			//CORE-BH-SuspendLog-08+]
-		}
-		else
-		{
-			suspend_log->enable_log = 0;
-			suspend_log->not_mpm_detect = 0; //CORE-BH-SuspendLog-08+
-		}
-	
 	collapsed = msm_pm_spm_power_collapse(cpu, from_idle, true);
 
-	if (unlikely(suspend_log->enable_log))
-	{
-		msm_show_resume_irq_mask = 1;
-		if (unlikely(msm_pm_debug_mask & MSM_PM_DEBUG_RPM_IDLE_LOG_ONLY_XOSD_VDDMIN))
-		{
-			if (suspend_log->not_mpm_reason == NOT_MPM_REASON_ENTER_XO_SHUTDOWN || suspend_log->not_mpm_reason == NOT_MPM_REASON_ENTER_VDD_MIN)
-			show_rpm_wakeup_info();		
-		}
-		else
-			show_rpm_wakeup_info();		
-			memset((u8*)suspend_log+4, 0, sizeof(rpm_suspend_log)-4);
-	}
-	else
-		msm_show_resume_irq_mask = 0;
-        //CORE-BH-SuspendLog-07*]
-	
 	if (msm_pm_save_cp15)
 		msm_pm_restore_cpu_reg();
 
@@ -1176,11 +950,6 @@ int msm_pm_idle_enter(enum msm_pm_sleep_mode sleep_mode)
 
 	time = ktime_to_ns(ktime_get()) - time;
 	msm_pm_add_stat(exit_stat, time);
-    //CORE-BH-SuspendLog-07*[
-	if (unlikely(suspend_log->enable_log))
-		if (exit_stat == MSM_PM_STAT_IDLE_POWER_COLLAPSE)
-			show_apss_wakeup_info(time);
-    //CORE-BH-SuspendLog-07*]		
 
 	do_div(time, 1000);
 	return (int) time;
@@ -1308,9 +1077,6 @@ static int msm_pm_enter(suspend_state_t state)
 				__func__);
 		}
 		time = msm_pm_timer_exit_suspend(time, period);
-
-		if (suspend_log->enable_log) //CORE-BH-SuspendLog-07*
-			show_apss_wakeup_info(time);
 		if (collapsed)
 			msm_pm_add_stat(MSM_PM_STAT_SUSPEND, time);
 		else

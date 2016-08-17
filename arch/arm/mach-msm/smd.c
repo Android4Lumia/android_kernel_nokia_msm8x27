@@ -47,9 +47,6 @@
 #include "smd_private.h"
 #include "modem_notifier.h"
 
-#include <linux/fih_sw_info.h>     //MTD-BSP-LC-SMEM-00 +
-
-
 #if defined(CONFIG_ARCH_QSD8X50) || defined(CONFIG_ARCH_MSM8X60) \
 	|| defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_FSM9XXX) \
 	|| defined(CONFIG_ARCH_MSM9615)	|| defined(CONFIG_ARCH_APQ8064)
@@ -120,18 +117,6 @@ struct smsm_state_info {
 	uint32_t intr_mask_set;
 	uint32_t intr_mask_clear;
 };
-
-//MTD-BSP-LC-SMEM-00 +[
-static struct smem_oem_info oem_info = {0};
-unsigned long fih_hw_id = 0;
-static unsigned int fih_product_id = 0;
-static unsigned int fih_product_phase = 0;
-static unsigned int fih_band_id = 0;
-static unsigned int fih_sim_type_value = 0; 
-static unsigned int fih_power_on_cause; //MTD-KERNEL-DL-POC-00
-static int is_warmboot = 0; //MTD-KERNEL-DL-PWRON_CAUSE-00 +
-//MTD-BSP-LC-SMEM-00 +]
-static char fih_amss_version[30] = {0};    //MTD-BSP-LC-Get_Version-00 +
 
 struct interrupt_config_item {
 	/* must be initialized */
@@ -3577,6 +3562,11 @@ static int restart_notifier_cb(struct notifier_block *this,
 				  unsigned long code,
 				  void *data)
 {
+	/*
+	 * Some SMD or SMSM clients assume SMD/SMSM SSR handling will be
+	 * done in the AFTER_SHUTDOWN level.  If this ever changes, extra
+	 * care should be taken to verify no clients are broken.
+	 */
 	if (code == SUBSYS_AFTER_SHUTDOWN) {
 		struct restart_notifier_block *notifier;
 
@@ -3591,171 +3581,6 @@ static int restart_notifier_cb(struct notifier_block *this,
 
 	return NOTIFY_DONE;
 }
-
-//MTD-KERNEL-DL-PWRON_CAUSE-00 +[
-//MTD-KERNEL-DL-POC-00 +[
-static int __init startup_reason_setup(char *param)
-{
-	unsigned int poweron_reason;
-
-	sscanf(param, "%x", &poweron_reason);
-	printk(KERN_ERR "S1 boot - power on cause = 0x%08x \n", poweron_reason);
-	return 0;
-}
-early_param("startup", startup_reason_setup);
-
-static int __init warmboot_reason_setup(char *param)
-{
-	unsigned int warmboot_reason;
-
-	sscanf(param, "%x", &warmboot_reason);
-	printk(KERN_ERR "S1 boot - warmboot reason = 0x%08x \n", warmboot_reason);
-	if (warmboot_reason != 0)
-		is_warmboot = 1;
-	return 0;
-}
-early_param("warmboot", warmboot_reason_setup);
-
-void * get_pwron_cause_virt_addr(void);
-void * get_hw_wd_virt_addr(void);
-
-void fih_parse_power_on_cause (void)
-{
-	unsigned int *pwron_cause_ptr;
-	unsigned int *hw_wd_ptr;
-
-	pwron_cause_ptr = (unsigned int*) get_pwron_cause_virt_addr();
-	hw_wd_ptr = (unsigned int*) get_hw_wd_virt_addr();
-	if ( (pwron_cause_ptr != NULL) && (hw_wd_ptr != NULL) ) {
-		if (is_warmboot != 0) {
-			//CORE-DL-FixForcePowerOn-00 +[
-			if (*hw_wd_ptr == FIH_HW_WD_SIGNATURE)
-				*pwron_cause_ptr |= MTD_PWR_ON_EVENT_HW_WD_RESET;
-
-			//CORE-DL-AddPocForRPM-00 +[
-			if (*pwron_cause_ptr & MTD_PWR_ON_EVENT_RPM_WD_RESET)
-				printk(KERN_ERR "System was reset by RPM Watchdog Reset!\r\n");
-			//CORE-DL-AddPocForRPM-00 +]
-
-			fih_power_on_cause |= *pwron_cause_ptr;
-			if ((*pwron_cause_ptr == MTD_PWR_ON_EVENT_CLEAN_DATA) ||
-				(*pwron_cause_ptr == MTD_PWR_ON_EVENT_SOFTWARE_RESET) || //CORE-DL-AddPocForSwReset-00
-				(*pwron_cause_ptr == MTD_PWR_ON_EVENT_PWR_OFF_CHG_REBOOT)) {
-				printk(KERN_ERR "System was GOOD! No news is good news.\r\n");
-			} else {
-				fih_power_on_cause |= MTD_PWR_ON_EVENT_ABNORMAL_RESET;
-				printk(KERN_ERR "System was NOT GOOD! Please check the power on cause.\r\n");
-			}
-			//CORE-DL-FixForcePowerOn-00 +]
-		} else {
-			printk(KERN_ERR "Cold boot!\r\n");
-		}
-		//Clean the signature
-		*pwron_cause_ptr = MTD_PWR_ON_EVENT_CLEAN_DATA;
-		//We will clean the signature when we reset device properly
-		*hw_wd_ptr = FIH_HW_WD_SIGNATURE;
-	}
-}
-//MTD-KERNEL-DL-POC-00 +]
-//MTD-KERNEL-DL-PWRON_CAUSE-00 +[
-
-//MTD-BSP-LC-SMEM-00 +[
-void fih_get_oem_info(void)
-{
-  struct smem_oem_info *fih_smem_info = smem_alloc2(SMEM_ID_VENDOR0, sizeof(oem_info));
-
-  printk(KERN_ERR "FIH kernel : Enter fih_get_oem_info() function.\r\n");
-
-  if (fih_smem_info==NULL)
-  {
-    printk(KERN_ERR "FIH kernel : fih_smem_info is NULL\r\n");
-    return;
-  }
-  memcpy(&oem_info, fih_smem_info, sizeof(oem_info));
-
-  fih_hw_id = oem_info.hw_id;
-  
-  printk(KERN_ERR "FIH kernel - fih_hw_id = 0x%lx\r\n",fih_hw_id);
-
-  //get product id
-  fih_product_id = fih_hw_id&0xff;
-  printk(KERN_ERR "FIH kernel - fih_product_id = %d \r\n",fih_product_id);
-
-  //get product phase
-  fih_product_phase = (fih_hw_id>>PHASE_ID_SHIFT_MASK)&0xff;
-  printk(KERN_ERR "FIH kernel - fih_product_phase = %d \r\n",fih_product_phase);
-
-  //get band id
-  fih_band_id = (fih_hw_id>>BAND_ID_SHIFT_MASK)&0xff;
-  printk(KERN_ERR "FIH kernel - fih_band_id = %d \r\n",fih_band_id);
-
-  fih_sim_type_value = (fih_hw_id>>SIM_ID_SHIFT_MASK)&0x3;
-  printk(KERN_ERR "FIH kernel - fih_sim_type_value = %d \r\n",fih_sim_type_value);	
-
-//MTD-KERNEL-DL-POC-00 +[
-  fih_parse_power_on_cause();
-  printk(KERN_ERR "FIH kernel - power on cause = 0x%08x \r\n", fih_power_on_cause);
-//MTD-KERNEL-DL-POC-00 +]
-} /*fih_get_oem_info*/
-EXPORT_SYMBOL(fih_get_oem_info);
-
-unsigned int fih_get_product_id(void)
-{
-	return fih_product_id;
-} 
-EXPORT_SYMBOL(fih_get_product_id);
-
-unsigned int fih_get_product_phase(void)
-{
-	return fih_product_phase;
-} 
-EXPORT_SYMBOL(fih_get_product_phase);
-
-unsigned int fih_get_band_id(void)
-{
-	return fih_band_id;
-} 
-EXPORT_SYMBOL(fih_get_band_id);
-
-unsigned int fih_get_sim_id(void)
-{
-	return fih_sim_type_value;
-} 
-EXPORT_SYMBOL(fih_get_sim_id);
-//MTD-BSP-LC-SMEM-00 +]
-
-//MTD-KERNEL-DL-FixCoverity-00 +[
-unsigned int fih_get_power_on_cause(void)
-{
-	return fih_power_on_cause;
-}
-EXPORT_SYMBOL(fih_get_power_on_cause);
-module_param_named(poweron_cause, fih_power_on_cause, int, S_IRUGO);
-//MTD-KERNEL-DL-FixCoverity-00 +[
-
-//MTD-BSP-LC-Get_Version-00 +[
-void fih_get_NONHLOS_version(void)
-{
-  struct smem_oem_info *fih_smem_info = smem_alloc(SMEM_ID_VENDOR0, sizeof(oem_info));
-
-  if (fih_smem_info==NULL)
-  {
-    printk(KERN_ERR "FIH kernel : fih_smem_info is NULL\r\n");
-    return;
-  }
-  memcpy(&oem_info, fih_smem_info, sizeof(oem_info));
-
-  //get AMSS Version
-  snprintf(fih_amss_version, sizeof(fih_amss_version), oem_info.amss_version);
-  printk(KERN_ERR "FIH kernel : Non-HLOS Version = %s \r\n",fih_amss_version);
-}
-char *fih_get_amss_version(void)
-{
-       return fih_amss_version;
-} 
-EXPORT_SYMBOL(fih_get_amss_version);
-//MTD-BSP-LC-Get_Version-00 +]
-
 
 static __init int modem_restart_late_init(void)
 {

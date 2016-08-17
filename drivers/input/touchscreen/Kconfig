@@ -965,8 +965,6 @@ config TOUCH_REG_MAP_TM2000
 	default y
 	help
 	  Synaptics Register map TM2000.
-	  
-source "drivers/input/touchscreen/synaptics-rmi/Kconfig"
 
 config TOUCHSCREEN_SYNAPTICS_I2C_RMI4
 	tristate "Synaptics DSX I2C touchscreen"

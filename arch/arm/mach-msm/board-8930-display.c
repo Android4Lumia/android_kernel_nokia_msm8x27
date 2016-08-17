@@ -27,16 +27,14 @@
 
 #include "devices.h"
 #include "board-8930.h"
-#include <linux/fih_hw_info.h>
 #include <linux/spinlock.h>
 
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
-
 #define MSM_FB_PRIM_BUF_SIZE \
-		(roundup((864 * 480 * 4), 4096) * 3) /* 4 bpp x 3 pages */
+		(roundup((810 * 480 * 4), 4096) * 3) /* 4 bpp x 3 pages */
 #else
 #define MSM_FB_PRIM_BUF_SIZE \
-		(roundup((864 * 480 * 4), 4096) * 2) /* 4 bpp x 2 pages */
+		(roundup((810 * 480 * 4), 4096) * 2) /* 4 bpp x 2 pages */
 #endif
 /* Note: must be multiple of 4096 */
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE, 4096)
@@ -154,7 +152,6 @@ static int mipi_dsi_panel_power(int on)
 	int rc = 0, retVal = 0;
 	static struct regulator *reg_vdd, *reg_iovdd, *reg_vdd_mipi;
 	static bool dsi_power_on = false;
-	unsigned int phaseid = 0;
 
 	pr_info("[DISPLAY] +%s(%d)\n", __func__, on);
 
@@ -186,7 +183,7 @@ static int mipi_dsi_panel_power(int on)
 			goto error;
 		}
 
-		rc = regulator_set_voltage(reg_vdd, 2800000, 2800000);
+		rc = regulator_set_voltage(reg_vdd, 2800000, 2850000);
 		if (rc) {
 			pr_err("[DISPLAY]set_voltage reg_vdd failed, rc=%d\n", rc);
 			retVal = -EINVAL;
@@ -194,16 +191,8 @@ static int mipi_dsi_panel_power(int on)
 		}
 
 		/* INIT IOVDD FOR LCD*/
-		phaseid = fih_get_product_phase();
-		if(phaseid == PHASE_EVM ){
-		pr_info("[DISPLAY]Get L18\n");
-			reg_iovdd = regulator_get(&msm_mipi_dsi1_device.dev,
-				"lcd_iovdd");
-		}else{
-			pr_info("[DISPLAY]Get LVS2\n");
-			reg_iovdd = regulator_get(&msm_mipi_dsi1_device.dev,
-				"lcd_lvs2");
-		}
+		reg_iovdd = regulator_get(&msm_mipi_dsi1_device.dev,
+			"dsi_vddio");
 		if (IS_ERR(reg_iovdd)) {
 			pr_err("[DISPLAY]could not get reg_iovdd, rc = %ld\n",
 				PTR_ERR(reg_iovdd));
@@ -211,13 +200,11 @@ static int mipi_dsi_panel_power(int on)
 			goto error;
 		}
 
-		if(phaseid == PHASE_EVM ){
-			rc = regulator_set_voltage(reg_iovdd, 1800000, 1800000);
-			if (rc) {
-				pr_err("[DISPLAY]set_voltage reg_iovdd failed, rc=%d\n", rc);
-				rc = -ENODEV;
-				goto error;
-			}
+		rc = regulator_set_voltage(reg_iovdd, 1800000, 1800000);
+		if (rc) {
+			pr_err("[DISPLAY]set_voltage reg_iovdd failed, rc=%d\n", rc);
+			rc = -ENODEV;
+			goto error;
 		}
 
 		dsi_power_on = true;
@@ -250,7 +237,7 @@ static int mipi_dsi_panel_power(int on)
 		}
 		rc = regulator_enable(reg_iovdd);
 		if (rc) {
-			pr_err("[DISPLAY]enable l18 failed, rc=%d\n", rc);
+			pr_err("[DISPLAY]enable dsi_vddio failed, rc=%d\n", rc);
 			retVal = -ENODEV;
 			goto error;
 		}
@@ -264,7 +251,7 @@ static int mipi_dsi_panel_power(int on)
 	} else {
 		rc = regulator_disable(reg_iovdd);
 		if (rc) {
-			pr_err("[DISPLAY]disable reg_vdd failed, rc=%d\n", rc);
+			pr_err("[DISPLAY]disable reg_iovdd failed, rc=%d\n", rc);
 			retVal = -ENODEV;
 			goto error;
 		}

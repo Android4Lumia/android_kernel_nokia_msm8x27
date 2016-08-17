@@ -127,7 +127,6 @@ obj-y				+= ieee802154/
 obj-y				+= clk/
 
 obj-$(CONFIG_HWSPINLOCK)	+= hwspinlock/
-obj-$(CONFIG_FIH_DEVELOPMENT_TOOL)	+= development_tool/
 obj-$(CONFIG_NFC)		+= nfc/
 obj-$(CONFIG_IOMMU_SUPPORT)	+= iommu/
 obj-$(CONFIG_REMOTEPROC)	+= remoteproc/
@@ -143,7 +142,6 @@ obj-$(CONFIG_PM_DEVFREQ)	+= devfreq/
 obj-$(CONFIG_MOBICORE_SUPPORT)  += gud/
 
 obj-$(CONFIG_CORESIGHT)		+= coresight/
-obj-$(CONFIG_ESOC)		+= esoc/
 
 #sensor_class
 obj-$(CONFIG_SENSORS)		+= sensors/

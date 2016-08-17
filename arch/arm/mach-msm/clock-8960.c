@@ -6120,28 +6120,18 @@ static struct clk_lookup msm_clocks_8930[] = {
 	CLK_LOOKUP("iface_clk",		pmic_arb1_p_clk.c,	""),
 	CLK_LOOKUP("core_clk",		pmic_ssbi2_clk.c,	""),
 	CLK_LOOKUP("mem_clk",		rpm_msg_ram_p_clk.c,	""),
-//FIH-SW-MM-MC-BringUpCameraRawSensorS5k4e1-00+{
-#ifndef CONFIG_FIH_CAMERA
 	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"4-001a"),
 	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"4-006c"),
 	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"4-0048"),
 	CLK_LOOKUP("cam_clk",		cam2_clk.c,		NULL),
 	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"4-0020"),
-#endif
-
-#if (defined(CONFIG_S5K4E1) || defined(CONFIG_S5K4E1_2ND) || defined(CONFIG_AR0543))
-    CLK_LOOKUP("cam_clk",       cam0_clk.c, "4-006c"),
-#endif
-#ifdef CONFIG_S5K4E1_2ND
-    CLK_LOOKUP("cam_clk",       cam0_clk.c, "4-0020"),
-#endif
-#ifdef CONFIG_AR0543
-    CLK_LOOKUP("cam_clk",       cam0_clk.c, "4-006e"),
-#endif
-#ifdef CONFIG_HM03D5
-    CLK_LOOKUP("cam_clk",       cam1_clk.c, "4-0060"),
-#endif
-//FIH-SW-MM-MC-BringUpCameraRawSensorS5k4e1-00+}
+	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"8-001a"),
+	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"8-0036"),
+	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"8-006c"),
+	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"8-0010"),
+	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"8-0048"),
+	CLK_LOOKUP("cam_clk",		cam2_clk.c,		NULL),
+	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"8-0020"),
 	CLK_LOOKUP("csi_src_clk",	csi0_src_clk.c,		"msm_csid.0"),
 	CLK_LOOKUP("csi_src_clk",	csi1_src_clk.c,		"msm_csid.1"),
 	CLK_LOOKUP("csi_src_clk",	csi2_src_clk.c,		"msm_csid.2"),

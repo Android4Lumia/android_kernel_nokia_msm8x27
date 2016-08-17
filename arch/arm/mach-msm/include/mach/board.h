@@ -112,7 +112,6 @@ struct msm_camera_sensor_flash_current_driver {
 enum msm_camera_ext_led_flash_id {
 	MAM_CAMERA_EXT_LED_FLASH_SC628A,
 	MAM_CAMERA_EXT_LED_FLASH_TPS61310,
-	MAM_CAMERA_EXT_LED_FLASH_LM3642,//FIH-SW-MM-MC-BringUpLM3642ForCameraFlashLed-00+
 };
 
 struct msm_camera_sensor_flash_external {
@@ -228,18 +227,15 @@ struct msm_camera_sensor_platform_info {
 };
 
 enum msm_camera_actuator_name {
-    MSM_ACTUATOR_MAIN_CAM_0,
-    MSM_ACTUATOR_MAIN_CAM_1,
-    MSM_ACTUATOR_MAIN_CAM_2,
-    MSM_ACTUATOR_MAIN_CAM_3,
-    MSM_ACTUATOR_MAIN_CAM_4,
-    MSM_ACTUATOR_MAIN_CAM_5,
-    MSM_ACTUATOR_MAIN_CAM_FIH_6,//FIH-SW-MM-MC-ImplementCameraAutoFocusForS5K4E1-00+
-    MSM_ACTUATOR_MAIN_CAM_FIH_7,//FIH-SW-MM-MC-BringUpAD5823ForAF-00+
-    MSM_ACTUATOR_MAIN_CAM_FIH_8,//MM-MC-BringUpAD5816ForAfOfLitenCustomizationModule-00+
-    MSM_ACTUATOR_WEB_CAM_0,
-    MSM_ACTUATOR_WEB_CAM_1,
-    MSM_ACTUATOR_WEB_CAM_2,
+	MSM_ACTUATOR_MAIN_CAM_0,
+	MSM_ACTUATOR_MAIN_CAM_1,
+	MSM_ACTUATOR_MAIN_CAM_2,
+	MSM_ACTUATOR_MAIN_CAM_3,
+	MSM_ACTUATOR_MAIN_CAM_4,
+	MSM_ACTUATOR_MAIN_CAM_5,
+	MSM_ACTUATOR_WEB_CAM_0,
+	MSM_ACTUATOR_WEB_CAM_1,
+	MSM_ACTUATOR_WEB_CAM_2,
 };
 
 struct msm_actuator_info {
