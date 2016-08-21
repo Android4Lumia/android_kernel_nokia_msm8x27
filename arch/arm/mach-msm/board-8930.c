@@ -163,9 +163,14 @@ struct sx150x_platform_data msm8930_sx150x_data[] = {
 #define MSM_HDMI_PRIM_ION_SF_SIZE MSM_HDMI_PRIM_PMEM_SIZE
 
 #define MSM_MM_FW_SIZE	(0x200000 - HOLE_SIZE) /*2MB -128Kb */
+#ifdef CONFIG_MSM_NOT_ENOUGH_RAM
+#define MSM8930_FIXED_AREA_START 0x97e00000
+#define MAX_FIXED_AREA_SIZE	0x08000000
+#else
 #define MSM8930_FIXED_AREA_START (0xa0000000 - (MSM_ION_MM_FW_SIZE + \
 								HOLE_SIZE))
 #define MAX_FIXED_AREA_SIZE	0x10000000
+#endif
 #define MSM8930_FW_START	MSM8930_FIXED_AREA_START
 #define MSM_ION_ADSP_SIZE	SZ_8M
 
@@ -481,11 +486,19 @@ static void __init reserve_ion_memory(void)
 				 * Heaps that use CMA but are not part of the
 				 * fixed set. Create wherever.
 				 */
+#ifdef CONFIG_MSM_NOT_ENOUGH_RAM
+				dma_declare_contiguous(
+					heap->priv,
+					heap->size,
+					0x9c000000,
+					0xa0000000);
+#else
 				dma_declare_contiguous(
 					heap->priv,
 					heap->size,
 					0,
 					0xb0000000);
+#endif
 			}
 		}
 	}

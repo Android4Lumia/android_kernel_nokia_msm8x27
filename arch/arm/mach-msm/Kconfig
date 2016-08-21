@@ -923,6 +923,10 @@ endmenu
 
 source "arch/arm/mach-msm/lge/Kconfig"
 
+config MSM_NOT_ENOUGH_RAM
+	bool "Device only has 512MB RAM"
+	default n
+
 config MSM_STACKED_MEMORY
 	bool "Stacked Memory"
 	default y
