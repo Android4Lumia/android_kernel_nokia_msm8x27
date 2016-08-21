@@ -217,7 +217,7 @@ struct synaptics_rmi4_f1a_handle {
 	unsigned char button_count;
 	unsigned char valid_button_count;
 	unsigned char *button_data_buffer;
-	unsigned char *button_map;
+	struct synaptics_rmi4_capacitance_button_map_info *button_map;
 	struct synaptics_rmi4_f1a_query button_query;
 	struct synaptics_rmi4_f1a_control button_control;
 };
@@ -856,7 +856,7 @@ static void synaptics_rmi4_f1a_report(struct synaptics_rmi4_data *rmi4_data,
 		dev_dbg(&rmi4_data->i2c_client->dev,
 				"%s: Button %d (code %d) ->%d\n",
 				__func__, button,
-				f1a->button_map[button],
+				f1a->button_map[button].keycode,
 				status);
 #ifdef NO_0D_WHILE_2D
 		if (rmi4_data->fingers_on_2d == false) {
@@ -871,13 +871,13 @@ static void synaptics_rmi4_f1a_report(struct synaptics_rmi4_data *rmi4_data,
 				}
 			}
 			input_report_key(rmi4_data->input_dev,
-					f1a->button_map[button],
+					f1a->button_map[button].keycode,
 					status);
 		} else {
 			if (before_2d_status[button] == 1) {
 				before_2d_status[button] = 0;
 				input_report_key(rmi4_data->input_dev,
-						f1a->button_map[button],
+						f1a->button_map[button].keycode,
 						status);
 			} else {
 				if (status == 1)
@@ -888,7 +888,7 @@ static void synaptics_rmi4_f1a_report(struct synaptics_rmi4_data *rmi4_data,
 		}
 #else
 		input_report_key(rmi4_data->input_dev,
-				f1a->button_map[button],
+				f1a->button_map[button].keycode,
 				status);
 #endif
 	}
@@ -1018,87 +1018,6 @@ static irqreturn_t synaptics_rmi4_irq(int irq, void *data)
 	synaptics_rmi4_sensor_report(rmi4_data);
 
 	return IRQ_HANDLED;
-}
-
-static int synaptics_rmi4_parse_dt(struct device *dev,
-				struct synaptics_rmi4_platform_data *rmi4_pdata)
-{
-	struct device_node *np = dev->of_node;
-	struct property *prop;
-	u32 temp_val, num_buttons;
-	u32 button_map[MAX_NUMBER_OF_BUTTONS];
-	int rc, i;
-
-	rmi4_pdata->i2c_pull_up = of_property_read_bool(np,
-			"synaptics,i2c-pull-up");
-	rmi4_pdata->regulator_en = of_property_read_bool(np,
-			"synaptics,reg-en");
-	rmi4_pdata->x_flip = of_property_read_bool(np, "synaptics,x-flip");
-	rmi4_pdata->y_flip = of_property_read_bool(np, "synaptics,y-flip");
-
-	rc = of_property_read_u32(np, "synaptics,panel-x", &temp_val);
-	if (rc && (rc != -EINVAL)) {
-		dev_err(dev, "Unable to read panel X dimension\n");
-		return rc;
-	} else {
-		rmi4_pdata->panel_x = temp_val;
-	}
-
-	rc = of_property_read_u32(np, "synaptics,panel-y", &temp_val);
-	if (rc && (rc != -EINVAL)) {
-		dev_err(dev, "Unable to read panel Y dimension\n");
-		return rc;
-	} else {
-		rmi4_pdata->panel_y = temp_val;
-	}
-
-	rc = of_property_read_string(np, "synaptics,fw-image-name",
-		&rmi4_pdata->fw_image_name);
-	if (rc && (rc != -EINVAL)) {
-		dev_err(dev, "Unable to read fw image name\n");
-		return rc;
-	}
-
-	/* reset, irq gpio info */
-	rmi4_pdata->reset_gpio = of_get_named_gpio_flags(np,
-			"synaptics,reset-gpio", 0, &rmi4_pdata->reset_flags);
-	rmi4_pdata->irq_gpio = of_get_named_gpio_flags(np,
-			"synaptics,irq-gpio", 0, &rmi4_pdata->irq_flags);
-
-	prop = of_find_property(np, "synaptics,button-map", NULL);
-	if (prop) {
-		num_buttons = prop->length / sizeof(temp_val);
-
-		rmi4_pdata->capacitance_button_map = devm_kzalloc(dev,
-			sizeof(*rmi4_pdata->capacitance_button_map),
-			GFP_KERNEL);
-		if (!rmi4_pdata->capacitance_button_map)
-			return -ENOMEM;
-
-		rmi4_pdata->capacitance_button_map->map = devm_kzalloc(dev,
-			sizeof(*rmi4_pdata->capacitance_button_map->map) *
-			MAX_NUMBER_OF_BUTTONS, GFP_KERNEL);
-		if (!rmi4_pdata->capacitance_button_map->map)
-			return -ENOMEM;
-
-		if (num_buttons <= MAX_NUMBER_OF_BUTTONS) {
-			rc = of_property_read_u32_array(np,
-				"synaptics,button-map", button_map,
-				num_buttons);
-			if (rc) {
-				dev_err(dev, "Unable to read key codes\n");
-				return rc;
-			}
-			for (i = 0; i < num_buttons; i++)
-				rmi4_pdata->capacitance_button_map->map[i] =
-					button_map[i];
-			rmi4_pdata->capacitance_button_map->nbuttons =
-				num_buttons;
-		} else {
-			return -EINVAL;
-		}
-	}
-	return 0;
 }
 
  /**
@@ -1331,6 +1250,60 @@ static void synaptics_rmi4_f1a_kfree(struct synaptics_rmi4_fn *fhandler)
 	return;
 }
 
+static char *vkey_buf;
+
+static ssize_t synaptics_rmi4_f1a_virtualkeys_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+	strlcpy(buf, vkey_buf, PAGE_SIZE);
+	return strnlen(buf, PAGE_SIZE);
+}
+ 
+static int synaptics_rmi4_f1a_create_board_properties(struct synaptics_rmi4_data *rmi4_data)
+{
+	int err = 0, i;
+    ssize_t size = 0;
+
+	vkey_buf = devm_kzalloc(&rmi4_data->i2c_client->dev, PAGE_SIZE, GFP_KERNEL);
+	if (!vkey_buf) {
+		dev_err(&rmi4_data->i2c_client->dev, "Failed to allocate memory\n");
+		err = -ENOMEM;
+		goto free_kzalloc;
+	}
+ 
+	for (i = 0; i < rmi4_data->board->capacitance_button_map->nbuttons; ++i)
+		size += snprintf(vkey_buf + size, PAGE_SIZE - size, "0x%02x:%d:%d:%d:%d:%d\n",
+				EV_KEY, rmi4_data->board->capacitance_button_map->map[i].keycode,
+				rmi4_data->board->capacitance_button_map->map[i].x + rmi4_data->board->capacitance_button_map->map[i].width / 2,
+				rmi4_data->board->capacitance_button_map->map[i].y + rmi4_data->board->capacitance_button_map->map[i].height / 2,
+				rmi4_data->board->capacitance_button_map->map[i].width, rmi4_data->board->capacitance_button_map->map[i].height);
+
+	rmi4_data->vkeys_dir = kobject_create_and_add("board_properties", NULL);
+	if (rmi4_data->vkeys_dir == NULL) {
+		err = -ENOMEM;
+		dev_err(&rmi4_data->i2c_client->dev, "Failed to create board_properties entry\n");
+		goto free_create_kobject;
+	}
+
+	sysfs_attr_init(&rmi4_data->vkeys_attr.attr);
+	rmi4_data->vkeys_attr.attr.name = "virtualkeys." DRIVER_NAME;
+	rmi4_data->vkeys_attr.attr.mode = S_IRUSR | S_IRGRP | S_IROTH;
+	rmi4_data->vkeys_attr.show      = synaptics_rmi4_f1a_virtualkeys_show;
+
+	err = sysfs_create_file(rmi4_data->vkeys_dir, &rmi4_data->vkeys_attr.attr);
+	if (err) {
+		dev_err(&rmi4_data->i2c_client->dev, "Failed to create virtualkeys entry\n");
+		goto free_create_vkeys_sysfs;
+	}
+
+	return 0;
+
+free_create_vkeys_sysfs:
+free_create_kobject:
+free_kzalloc:
+
+	return err;
+}
+
 static int synaptics_rmi4_f1a_init(struct synaptics_rmi4_data *rmi4_data,
 		struct synaptics_rmi4_fn *fhandler,
 		struct synaptics_rmi4_fn_desc *fd,
@@ -1363,6 +1336,8 @@ static int synaptics_rmi4_f1a_init(struct synaptics_rmi4_data *rmi4_data,
 	retval = synaptics_rmi4_capacitance_button_map(rmi4_data, fhandler);
 	if (retval < 0)
 		goto error_exit;
+		
+	synaptics_rmi4_f1a_create_board_properties(rmi4_data);
 
 	rmi4_data->button_0d_enabled = 1;
 
@@ -2068,21 +2043,7 @@ static int __devinit synaptics_rmi4_probe(struct i2c_client *client,
 		return -EIO;
 	}
 
-	if (client->dev.of_node) {
-		platform_data = devm_kzalloc(&client->dev,
-			sizeof(*platform_data),
-			GFP_KERNEL);
-		if (!platform_data) {
-			dev_err(&client->dev, "Failed to allocate memory\n");
-			return -ENOMEM;
-		}
-
-		retval = synaptics_rmi4_parse_dt(&client->dev, platform_data);
-		if (retval)
-			return retval;
-	} else {
-		platform_data = client->dev.platform_data;
-	}
+	platform_data = client->dev.platform_data;
 
 	if (!platform_data) {
 		dev_err(&client->dev,
@@ -2216,10 +2177,10 @@ static int __devinit synaptics_rmi4_probe(struct i2c_client *client,
 
 	input_set_abs_params(rmi4_data->input_dev,
 			ABS_MT_POSITION_X, 0,
-			rmi4_data->sensor_max_x, 0, 0);
+			rmi4_data->board->panel_x, 0, 0);
 	input_set_abs_params(rmi4_data->input_dev,
 			ABS_MT_POSITION_Y, 0,
-			rmi4_data->sensor_max_y, 0, 0);
+			rmi4_data->board->panel_y, 0, 0);
 	input_set_abs_params(rmi4_data->input_dev,
 			ABS_PRESSURE, 0, 255, 0, 0);
 #ifdef REPORT_2D_W
@@ -2245,10 +2206,10 @@ static int __devinit synaptics_rmi4_probe(struct i2c_client *client,
 
 	if (f1a) {
 		for (ii = 0; ii < f1a->valid_button_count; ii++) {
-			set_bit(f1a->button_map[ii],
+			set_bit(f1a->button_map[ii].keycode,
 					rmi4_data->input_dev->keybit);
 			input_set_capability(rmi4_data->input_dev,
-					EV_KEY, f1a->button_map[ii]);
+					EV_KEY, f1a->button_map[ii].keycode);
 		}
 	}
 

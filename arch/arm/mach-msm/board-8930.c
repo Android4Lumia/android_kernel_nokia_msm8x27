@@ -1855,6 +1855,7 @@ static const u8 mxt_config_data_8930_v2[] = {
 	0, 0, 0, 0,
 };
 
+#if 0
 static ssize_t mxt224e_vkeys_show(struct kobject *kobj,
 			struct kobj_attribute *attr, char *buf)
 {
@@ -1899,6 +1900,7 @@ static void mxt_init_vkeys_8930(void)
 
 	return;
 }
+#endif
 
 static struct mxt_config_info mxt_config_array[] = {
 	{
@@ -1962,20 +1964,15 @@ static struct i2c_board_info mxt_device_info_8930[] __initdata = {
 
 /*»     Synaptics Thin Driver»  */
 
-static unsigned char synaptic_rmi4_button_codes[] = {KEY_MENU, KEY_HOME,
-							KEY_BACK};
+static struct synaptics_rmi4_capacitance_button_map_info synaptic_rmi4_button_infos[] = {
+	{ KEY_BACK, 8, 830, 100, 55 },
+	{ KEY_HOMEPAGE, 197, 830, 100, 55 },
+	{ KEY_MENU, 372, 830, 100, 55 }
+};
 							
-/*
-"Back"="8,830 108,885"
-
-"Start"="197,830 297,885"
-
-"Search"="372,830 472,885"
-*/
-
 static struct synaptics_rmi4_capacitance_button_map synaptic_rmi4_button_map = {
-	.nbuttons = ARRAY_SIZE(synaptic_rmi4_button_codes),
-	.map = synaptic_rmi4_button_codes,
+	.nbuttons = ARRAY_SIZE(synaptic_rmi4_button_infos),
+	.map = synaptic_rmi4_button_infos,
 };
 
 static struct synaptics_rmi4_platform_data rmi4_platformdata = {
@@ -3072,8 +3069,10 @@ static void __init msm8930_cdp_init(void)
 	msm8930_init_cam();
 #endif
 	msm8930_init_mmc();
+#if 0
 	if (!machine_is_msm8930_evt())
 		mxt_init_vkeys_8930();
+#endif
 	register_i2c_devices();
 	msm8930_init_fb();
 

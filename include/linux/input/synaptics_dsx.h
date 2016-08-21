@@ -26,9 +26,16 @@
  * @nbuttons: number of buttons
  * @map: button map
  */
+struct synaptics_rmi4_capacitance_button_map_info
+{
+    int keycode;
+    int x, y;
+    int width, height;
+};
+
 struct synaptics_rmi4_capacitance_button_map {
 	unsigned char nbuttons;
-	unsigned char *map;
+	struct synaptics_rmi4_capacitance_button_map_info *map;
 };
 
 /*

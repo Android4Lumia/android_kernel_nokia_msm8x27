@@ -112,6 +112,7 @@ VREG_CONSUMERS(L11) = {
 	REGULATOR_SUPPLY("CDC_VDDA_RX",		"sitar1p1-slim"),
 	REGULATOR_SUPPLY("vcc_i2c",		"0-0048"),
 	REGULATOR_SUPPLY("mhl_iovcc18",		"0-0039"),
+	REGULATOR_SUPPLY("dsi_vddio",		"mipi_dsi.1"),
 };
 VREG_CONSUMERS(L12) = {
 	REGULATOR_SUPPLY("8038_l12",		NULL),
@@ -169,7 +170,6 @@ VREG_CONSUMERS(L22) = {
 };
 VREG_CONSUMERS(L23) = {
 	REGULATOR_SUPPLY("8038_l23",		NULL),
-	REGULATOR_SUPPLY("dsi_vddio",		"mipi_dsi.1"),
 	REGULATOR_SUPPLY("dsi_pll_vddio",	"mdp.0"),
 	REGULATOR_SUPPLY("hdmi_avdd",		"hdmi_msm.0"),
 	REGULATOR_SUPPLY("hdmi_vcc",		"hdmi_msm.0"),

@@ -235,6 +235,8 @@ struct synaptics_rmi4_data {
 	struct early_suspend early_suspend;
 #endif
 #endif
+	struct kobject *vkeys_dir;
+	struct kobj_attribute vkeys_attr;
 };
 
 enum exp_fn {
