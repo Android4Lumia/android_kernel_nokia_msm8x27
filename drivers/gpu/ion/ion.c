@@ -152,7 +152,7 @@ static void ion_iommu_add(struct ion_buffer *buffer,
 		} else if (iommu->key > entry->key) {
 			p = &(*p)->rb_right;
 		} else {
-			pr_err("%s: buffer %p already has mapping for domain %d"
+			pr_err("%s: buffer %pK already has mapping for domain %d"
 				" and partition %d\n", __func__,
 				buffer,
 				iommu_map_domain(iommu),
@@ -701,12 +701,12 @@ int ion_map_iommu(struct ion_client *client, struct ion_handle *handle,
 		}
 	} else {
 		if (iommu_map->flags != iommu_flags) {
-			pr_err("%s: handle %p is already mapped with iommu flags %lx, trying to map with flags %lx\n",
+			pr_err("%s: handle %pK is already mapped with iommu flags %lx, trying to map with flags %lx\n",
 				__func__, handle,
 				iommu_map->flags, iommu_flags);
 			ret = -EINVAL;
 		} else if (iommu_map->mapped_size != iova_length) {
-			pr_err("%s: handle %p is already mapped with length"
+			pr_err("%s: handle %pK is already mapped with length"
 					" %x, trying to map with length %lx\n",
 				__func__, handle, iommu_map->mapped_size,
 				iova_length);
@@ -751,7 +751,7 @@ void ion_unmap_iommu(struct ion_client *client, struct ion_handle *handle,
 	iommu_map = ion_iommu_lookup(buffer, domain_num, partition_num);
 
 	if (!iommu_map) {
-		WARN(1, "%s: (%d,%d) was never mapped for %p\n", __func__,
+		WARN(1, "%s: (%d,%d) was never mapped for %pK\n", __func__,
 				domain_num, partition_num, buffer);
 		goto out;
 	}

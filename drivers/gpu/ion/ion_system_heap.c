@@ -2,7 +2,7 @@
  * drivers/gpu/ion/ion_system_heap.c
  *
  * Copyright (C) 2011 Google, Inc.
- * Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2015,2016 The Linux Foundation. All rights reserved.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -300,7 +300,7 @@ int ion_system_heap_map_iommu(struct ion_buffer *buffer,
 			      buffer->size, prot);
 
 	if (ret) {
-		pr_err("%s: could not map %lx in domain %p\n",
+		pr_err("%s: could not map %lx in domain %pK\n",
 			__func__, data->iova_addr, domain);
 		goto out1;
 	}
@@ -447,7 +447,7 @@ int ion_system_contig_heap_cache_ops(struct ion_heap *heap,
 
 		pstart = virt_to_phys(buffer->priv_virt) + offset;
 		if (!pstart) {
-			WARN(1, "Could not do virt to phys translation on %p\n",
+			WARN(1, "Could not do virt to phys translation on %pK\n",
 				buffer->priv_virt);
 			return -EINVAL;
 		}
@@ -520,7 +520,7 @@ int ion_system_contig_heap_map_iommu(struct ion_buffer *buffer,
 	ret = iommu_map_range(domain, data->iova_addr, sglist,
 			      buffer->size, prot);
 	if (ret) {
-		pr_err("%s: could not map %lx in domain %p\n",
+		pr_err("%s: could not map %lx in domain %pK\n",
 			__func__, data->iova_addr, domain);
 		goto out1;
 	}
