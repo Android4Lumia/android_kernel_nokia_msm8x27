@@ -75,3 +75,4 @@ obj-y += tspdrv/
 obj-$(CONFIG_BU52031NVX) += pm8xxx-cradle.o
 obj-$(CONFIG_SLIMPORT_ANX7808)	+= slimport_anx7808/
 obj-$(CONFIG_UID_CPUTIME) 	+= uid_cputime.o
+obj-$(CONFIG_ETZKX_ACCEL)	+= etzkx.o

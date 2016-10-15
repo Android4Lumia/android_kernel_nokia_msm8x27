@@ -1996,6 +1996,35 @@ static struct i2c_board_info rmi4_i2c_devices[] = {
 	},
 };
 
+/* ETZKX KXCNL */
+#ifdef CONFIG_ETZKX_ACCEL
+
+#include <linux/i2c/etzkx.h>
+
+static int etzkx_init( void ) {
+	printk("ETZKX init();\n");
+	return 0;
+}
+
+static struct etzkx_platform_data etzkx_platformdata = {
+	.init = &etzkx_init,
+	.x_map = 0,
+	.y_map = 0,
+	.z_map = 0,
+	.x_negate = 0,
+	.y_negate = 0,
+	.z_negate = 0,
+};
+
+static struct i2c_board_info etzkx_i2c_devices[] = {
+	{
+		I2C_BOARD_INFO("etzkx", 0x1E),
+		.platform_data = &etzkx_platformdata,
+	},
+};
+
+#endif
+
 #define MHL_POWER_GPIO_PM8038	PM8038_GPIO_PM_TO_SYS(MHL_GPIO_PWR_EN)
 #define MHL_POWER_GPIO_PM8917	PM8917_GPIO_PM_TO_SYS(25)
 static struct msm_mhl_platform_data mhl_platform_data = {
@@ -2732,7 +2761,14 @@ static struct i2c_registry msm8960_i2c_devices[] __initdata = {
 		ARRAY_SIZE(bmp18x_i2c_boardinfo),
 	},
 #endif
-
+#ifdef CONFIG_ETZKX_ACCEL
+	{
+		I2C_SURF | I2C_FFA | I2C_FLUID | I2C_EVT,
+		MSM_8930_GSBI12_QUP_I2C_BUS_ID,
+		etzkx_i2c_devices,
+		ARRAY_SIZE(etzkx_i2c_devices),
+	},
+#endif
 
 };
 #endif /* CONFIG_I2C */
