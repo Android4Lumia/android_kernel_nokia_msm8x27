@@ -998,7 +998,7 @@ static struct dsi_cmd_desc orise_race_video_on_cmds[] = {
 	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(race_unknown_cmd), race_unknown_cmd},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_set_pixel_format), race_set_pixel_format},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_ctrl_display), race_ctrl_display},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(write_display_brightness), write_display_brightness},
+	//{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(write_display_brightness), write_display_brightness},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_cabc_on), race_cabc_on},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(race_set_pixel_format), race_set_pixel_format},
 	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(display_on), display_on},
@@ -1010,11 +1010,11 @@ static struct dsi_cmd_desc orise_race_video_off_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(enter_sleep), enter_sleep},
 };
 /* ----------- [For RACE panel setting End] ----------- */
-
+//#if 0
 static struct dsi_cmd_desc orise_video_bkl_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 1, sizeof(write_display_brightness), write_display_brightness}
 };
-
+//#endif
 static struct dsi_cmd_desc x47_orise_cmi_video_off_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 40,
 		sizeof(display_off), display_off},
@@ -1147,7 +1147,8 @@ static int mipi_orise_lcd_off(struct platform_device *pdev)
 static void mipi_orise_lcd_backlight(struct msm_fb_data_type *mfd)
 {
 	printk(KERN_ALERT "[DISPLAY] Enter %s(%i)\n", __func__, mfd->bl_level);
-
+	//WARN_ON(1);
+//#if 0
 	if (unlikely(!display_initialize))
 		return;
 
@@ -1159,6 +1160,7 @@ static void mipi_orise_lcd_backlight(struct msm_fb_data_type *mfd)
 			ARRAY_SIZE(orise_video_bkl_cmds));
 	mipi_set_tx_power_mode(1);
 	up(&mfd->dma->mutex);
+//#endif
 }
 
 static int __devinit mipi_orise_lcd_probe(struct platform_device *pdev)
