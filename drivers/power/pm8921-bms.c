@@ -32,69 +32,6 @@
 #include <linux/mutex.h>
 #include <linux/rtc.h>
 
-#define	MSG_NONE	0
-#define	MSG_INFO		1
-#define	MSG_DBG		2
-#define	MSG_TRK		3
-#define	MSG_WARN	4
-#define	MSG_ERR		5
-#define	MSG_MAX		6
-
-static int debug_level = MSG_TRK;
-static bool battery_valid = true;
-
-#define DBG_MSG(level, msg, ...)\
-do {\
-	if ((level < MSG_MAX) && (level >= debug_level)) \
-	{\
-		char   buf[200];\
-		char  *s = buf;\
-		\
-		s += snprintf(s, sizeof(buf) - (size_t)(s-buf), "[bms %s %d]:",  __func__, __LINE__);\
-		\
-		snprintf(s, sizeof(buf) - (size_t)(s-buf), msg, ##__VA_ARGS__);\
-		printk(KERN_ERR "%s", buf);\
-	}\
-}while(0)
-
-#if defined pr_err
-	#undef	pr_err
-#endif
-	
-#if defined pr_debug
-	#undef	pr_debug
-#endif
-	
-#if defined pr_info
-	#undef	pr_info
-#endif
-	
-#if defined pr_warn_ratelimited
-	#undef	pr_warn_ratelimited
-#endif
-	
-#if defined pr_warn
-	#undef	pr_warn
-#endif	
-
-#define pr_err(fmt, ...) \
-	DBG_MSG(MSG_ERR, fmt, ##__VA_ARGS__)
-
-#define pr_warn_ratelimited(fmt, ...) \
-	DBG_MSG(MSG_WARN, fmt, ##__VA_ARGS__)
-
-#define pr_warn(fmt, ...) \
-	DBG_MSG(MSG_WARN, fmt, ##__VA_ARGS__)
-
-#define pr_debug(fmt, ...) \
-	DBG_MSG(MSG_DBG, fmt, ##__VA_ARGS__)
-
-#define pr_track(fmt, ...) \
-	DBG_MSG(MSG_TRK, fmt, ##__VA_ARGS__)
-
-#define pr_info(fmt, ...) \
-	DBG_MSG(MSG_INFO, fmt, ##__VA_ARGS__)
-
 #define BMS_CONTROL		0x224
 #define BMS_S1_DELAY		0x225
 #define BMS_OUTPUT0		0x230
@@ -276,6 +213,11 @@ static struct notifier_block alarm_notifier = {
 	.notifier_call = pm8921_battery_gauge_alarm_notify,
 };
 
+static int bms_ro_ops_set(const char *val, const struct kernel_param *kp)
+{
+	return -EINVAL;
+}
+
 static int bms_ops_set(const char *val, const struct kernel_param *kp)
 {
 	if (*(int *)kp->arg == -EINVAL)
@@ -306,11 +248,6 @@ static int bms_start_cc_uah;
 static int bms_end_percent;
 static int bms_end_ocv_uv;
 static int bms_end_cc_uah;
-
-static int bms_ro_ops_set(const char *val, const struct kernel_param *kp)
-{
-	return -EINVAL;
-}
 
 static struct kernel_param_ops bms_ro_param_ops = {
 	.set = bms_ro_ops_set,
@@ -453,17 +390,12 @@ static int usb_chg_plugged_in(struct pm8921_bms_chip *chip)
 
 	/* if the charger driver was not initialized, use the restart reason */
 	if (val == -EINVAL) {
-		u8 restart_reason = pm8xxx_restart_reason(chip->dev->parent);
-		
-		if (restart_reason == PM8XXX_RESTART_CHG)
+		if (pm8xxx_restart_reason(chip->dev->parent)
+				== PM8XXX_RESTART_CHG)
 			val = 1;
 		else
 			val = 0;
-
-		pr_debug("val = %d %d", val, restart_reason);
 	}
-	else
-		pr_debug("val = %d", val);
 
 	return val;
 }
@@ -1945,7 +1877,7 @@ static int adjust_soc(struct pm8921_bms_chip *chip, int soc,
 		wake_lock_active(&chip->low_voltage_wake_lock)) {
 		if (is_voltage_below_cutoff_window(chip, ibat_ua, vbat_uv)) {
 			soc = 0;
-			pr_err("Voltage below cutoff, setting soc to 0\n");
+			pr_info("Voltage below cutoff, setting soc to 0\n");
 			goto out;
 		}
 	}
@@ -2087,11 +2019,6 @@ static void backup_soc_and_iavg(struct pm8921_bms_chip *chip, int batt_temp,
 	u8 temp;
 	int iavg_ma = chip->prev_uuc_iavg_ma;
 
-	if (!battery_valid) {
-		pr_err("battery invalid, just return");
-		return;
-	}
-
 	if (iavg_ma > IAVG_START)
 		temp = (iavg_ma - IAVG_START) / IAVG_STEP_SIZE_MA;
 	else
@@ -2141,7 +2068,6 @@ static void read_shutdown_soc_and_iavg(struct pm8921_bms_chip *chip)
 		if (chip->shutdown_soc == 0) {
 			pr_debug("No shutdown soc available\n");
 			shutdown_soc_invalid = 1;
-			pr_track("set shutdown_soc_invalid to 1");
 			chip->shutdown_iavg_ua = 0;
 		} else if (chip->shutdown_soc == SOC_ZERO) {
 			chip->shutdown_soc = 0;
@@ -2150,7 +2076,6 @@ static void read_shutdown_soc_and_iavg(struct pm8921_bms_chip *chip)
 
 	if (chip->ignore_shutdown_soc) {
 		shutdown_soc_invalid = 1;
-		pr_track("set shutdown_soc_invalid to 1");
 		chip->shutdown_soc = 0;
 		chip->shutdown_iavg_ua = 0;
 	}
@@ -2218,8 +2143,6 @@ static bool is_shutdown_soc_within_limits(struct pm8921_bms_chip *chip, int soc)
 	}
 
 	restart_reason = pm8xxx_restart_reason(chip->dev->parent);
-	pr_track("ssoc = %d, soc = %d, restart_reason = %d, invalid = %d", 
-		chip->shutdown_soc, soc, restart_reason, shutdown_soc_invalid);
 
 	/* if the cable plugged, only accept capacity decrease/increase within 4% */
 	if (restart_reason == PM8XXX_RESTART_CHG) {
@@ -2236,7 +2159,6 @@ static bool is_shutdown_soc_within_limits(struct pm8921_bms_chip *chip, int soc)
 			chip->shutdown_soc, soc);
 			
 		shutdown_soc_invalid = 1;
-		pr_track("set shutdown_soc_invalid to 1");
 		return 0;
 	}
 
@@ -2623,13 +2545,11 @@ static int report_state_of_charge(struct pm8921_bms_chip *chip)
 
 void pm8921_bms_battery_removed(void)
 {
-	battery_valid = false;
-	
 	if (!the_chip) {
 		pr_err("called before initialization\n");
 		return;
 	}
-	pr_err("Battery Removed Cleaning up\n");
+	pr_info("Battery Removed Cleaning up\n");
 
 	cancel_delayed_work_sync(&the_chip->calculate_soc_delayed_work);
 	calculated_soc = 0;
@@ -2693,7 +2613,6 @@ void pm8921_bms_invalidate_shutdown_soc(void)
 
 	mutex_lock(&soc_invalidation_mutex);
 	shutdown_soc_invalid = 1;
-	pr_track("set shutdown_soc_invalid to 1");
 	last_soc = -EINVAL;
 	if (the_chip) {
 		/* reset to pon ocv undoing what the adjusting did */
