@@ -13,7 +13,9 @@
 
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
+#include <linux/persistent_ram.h>
 #include <asm/io.h>
+#include <asm/setup.h>
 #include <linux/msm_ion.h>
 #include <mach/msm_iomap.h>
 #include <mach/irqs-8930.h>
@@ -26,6 +28,7 @@
 #include <mach/msm_rtb.h>
 #include <mach/msm_cache_dump.h>
 
+#include "board-8930.h"
 #include "devices.h"
 #include "rpm_log.h"
 #include "rpm_stats.h"
@@ -1352,3 +1355,42 @@ struct platform_device msm8930_cache_dump_device = {
 		.platform_data = &msm8930_cache_dump_pdata,
 	},
 };
+
+#ifdef CONFIG_ANDROID_PERSISTENT_RAM
+static struct persistent_ram_descriptor pram_descs[] = {
+#ifdef CONFIG_ANDROID_RAM_CONSOLE
+	{
+		.name = "ram_console",
+		.size = MSM8930_RAM_CONSOLE_SIZE,
+	},
+#endif
+};
+
+static struct persistent_ram msm8930_persistent_ram = {
+	.size = MSM8930_PERSISTENT_RAM_SIZE,
+	.num_descs = ARRAY_SIZE(pram_descs),
+	.descs = pram_descs,
+};
+
+void __init msm8930_add_persistent_ram(void)
+{
+	struct persistent_ram *pram = &msm8930_persistent_ram;
+	struct membank* bank = &meminfo.bank[0];
+
+	pram->start = bank->start + bank->size - MSM8930_PERSISTENT_RAM_SIZE;
+
+	persistent_ram_early_init(pram);
+}
+#endif
+
+#ifdef CONFIG_ANDROID_RAM_CONSOLE
+static struct platform_device ram_console_device = {
+	.name = "ram_console",
+	.id = -1,
+};
+
+void __init msm8930_add_ramconsole_devices(void)
+{
+	platform_device_register(&ram_console_device);
+}
+#endif /* CONFIG_ANDROID_RAM_CONSOLE */
