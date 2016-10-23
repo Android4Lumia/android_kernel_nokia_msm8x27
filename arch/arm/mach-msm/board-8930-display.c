@@ -145,8 +145,6 @@ error:
 	return retVal;
 }
 
-extern unsigned int fih_get_product_phase(void);
-
 static int mipi_dsi_panel_power(int on)
 {
 	int rc = 0, retVal = 0;
@@ -259,19 +257,6 @@ static int mipi_dsi_panel_power(int on)
 		if (rc) {
 			pr_err("[DISPLAY]disable reg_vdd failed, rc=%d\n", rc);
 			retVal = -ENODEV;
-			goto error;
-		}
-		rc = regulator_disable(reg_vdd_mipi);
-		if (rc) {
-			pr_err("[DISPLAY]disable reg_vdd_mipi failed, rc=%d\n", rc);
-			retVal = -ENODEV;
-			goto error;
-		}
-
-		rc = regulator_set_optimum_mode(reg_vdd_mipi, 100);
-		if (rc < 0) {
-			pr_err("[DISPLAY]set_optimum_mode reg_vdd_mipi failed, rc=%d\n", rc);
-			retVal = -EINVAL;
 			goto error;
 		}
 		rc = regulator_set_optimum_mode(reg_vdd, 100);
