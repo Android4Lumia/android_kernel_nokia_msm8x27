@@ -41,6 +41,7 @@
 #include <linux/memblock.h>
 #include <linux/msm_thermal.h>
 #include <linux/input/synaptics_dsx.h>
+#include <linux/input/ltr553.h>
 
 #include <linux/slimbus/slimbus.h>
 #include <linux/mfd/wcd9xxx/core.h>
@@ -648,6 +649,7 @@ static void __init msm8930_early_memory(void)
 static void __init msm8930_reserve(void)
 {
 	msm_reserve();
+	msm8930_add_persistent_ram();
 }
 
 static void __init msm8930_allocate_memory_regions(void)
@@ -2025,6 +2027,26 @@ static struct i2c_board_info etzkx_i2c_devices[] = {
 
 #endif
 
+/*»     LTR-554ALS»  */
+
+static struct ltr553_platform_data ltr553_platformdata = {
+	.irq_gpio = 49,
+	.irq_flags = IRQF_TRIGGER_LOW | IRQF_ONESHOT,
+	.als_ps_persist = 0x11,
+	.ps_led = 0x7f,
+	.ps_pulses = 8,
+	.als_integration_time = 0,
+	.ps_wakeup_threshold = 4,
+	
+};
+
+static struct i2c_board_info ltr554als[] = {
+	{
+		I2C_BOARD_INFO("ltr553", 0x23),
+		.platform_data = &ltr553_platformdata,
+	},
+};
+
 #define MHL_POWER_GPIO_PM8038	PM8038_GPIO_PM_TO_SYS(MHL_GPIO_PWR_EN)
 #define MHL_POWER_GPIO_PM8917	PM8917_GPIO_PM_TO_SYS(25)
 static struct msm_mhl_platform_data mhl_platform_data = {
@@ -2761,6 +2783,7 @@ static struct i2c_registry msm8960_i2c_devices[] __initdata = {
 		ARRAY_SIZE(bmp18x_i2c_boardinfo),
 	},
 #endif
+
 #ifdef CONFIG_ETZKX_ACCEL
 	{
 		I2C_SURF | I2C_FFA | I2C_FLUID | I2C_EVT,
@@ -2770,6 +2793,12 @@ static struct i2c_registry msm8960_i2c_devices[] __initdata = {
 	},
 #endif
 
+	{
+		I2C_SURF | I2C_FFA | I2C_FLUID | I2C_EVT,
+		MSM_8930_GSBI12_QUP_I2C_BUS_ID,
+		ltr554als,
+		ARRAY_SIZE(ltr554als),
+	},
 };
 #endif /* CONFIG_I2C */
 
@@ -3111,6 +3140,7 @@ static void __init msm8930_cdp_init(void)
 #endif
 	register_i2c_devices();
 	msm8930_init_fb();
+	msm8930_add_ramconsole_devices();
 
 	if (socinfo_get_platform_subtype() == PLATFORM_SUBTYPE_SGLTE) {
 		reg_size = ARRAY_SIZE((

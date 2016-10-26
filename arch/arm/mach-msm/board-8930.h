@@ -55,6 +55,14 @@
 #define PM8917_MPP_PM_TO_SYS(pm_gpio)	PM8038_MPP_PM_TO_SYS(pm_gpio)
 #define PM8917_IRQ_BASE			PM8038_IRQ_BASE
 
+#ifdef CONFIG_ANDROID_PERSISTENT_RAM
+#define MSM8930_PERSISTENT_RAM_SIZE	(SZ_1M)
+#endif
+
+#ifdef CONFIG_ANDROID_RAM_CONSOLE
+#define MSM8930_RAM_CONSOLE_SIZE	(124 * SZ_1K * 2)
+#endif
+
 /*
  * TODO: When physical 8930/PM8038 hardware becomes
  * available, replace this block with 8930/pm8038 regulator
@@ -166,3 +174,21 @@ void __init configure_8930_sglte_regulator(void);
 
 extern struct msm_rtb_platform_data msm8930_rtb_pdata;
 extern struct msm_cache_dump_platform_data msm8930_cache_dump_pdata;
+
+#ifdef CONFIG_ANDROID_PERSISTENT_RAM
+void __init msm8930_add_persistent_ram(void);
+#else
+static inline void __init msm8930_add_persistent_ram(void)
+{
+	/* empty */
+}
+#endif
+
+#ifdef CONFIG_ANDROID_RAM_CONSOLE
+void __init msm8930_add_ramconsole_devices(void);
+#else
+static inline void __init msm8930_add_ramconsole_devices(void)
+{
+	/* empty */
+}
+#endif

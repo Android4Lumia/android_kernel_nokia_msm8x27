@@ -124,9 +124,16 @@ EXPORT_SYMBOL(load_565rle_image);
 static void draw_logo(void)
 {
 	struct fb_info *fb_info = registered_fb[0];
-	int ret = 0, i = 0;
+	int ret = 0, i = 0, j;
 
 	if (fb_info && fb_info->fbops->fb_open) {
+		for (j = 0; j < 5; j++)
+		{
+			fb_info->fbops->fb_open(fb_info, 0);
+			fb_info->fbops->fb_release(fb_info, 0);
+			msleep(100);
+		}
+
 		ret = fb_info->fbops->fb_open(fb_info, 0);
 		if (ret != 0) {
 			printk(KERN_ERR "[DISPLAY]%s: Can not open fb, ret <%d>\n",

@@ -18,41 +18,6 @@
 
 #define PM8921_CHARGER_DEV_NAME	"pm8921-charger"
 
-/*
-	SONY charging algorithm related 
-*/
-enum battery_vendor {
-	BATTERY_VENDOR_SONY = 0,
-	BATTERY_VENDOR_ALIEN,
-	BATTERY_VENDOR_MAX,
-};
-
-enum sony_battery_type {
-	BATTERY_SONY_TYPEI = 0,
-	BATTERY_SONY_TYPEII,
-	BATTERY_SONY_INVALID,
-};
-
-enum battery_temp_status {
-	BATTERY_TEMP_STATUS_COLD = 0,
-	BATTERY_TEMP_STATUS_NORMAL,
-	BATTERY_TEMP_STATUS_WARM,
-	BATTERY_TEMP_STATUS_HOT,
-	BATTERY_TEMP_STATUS_MAX,
-};
-
-enum charger_type {
-	CHARGER_TYPE_USB = 0,	
-	CHARGER_TYPE_AC,
-	CHARGER_TYPE_MAX,
-	CHARGER_TYPE_INVALID,
-};
-
-struct charging_temp_range {
-	int			high_thr_temp;
-	int			low_thr_temp;
-};
-
 struct pm8xxx_charger_core_data {
 	unsigned int	vbat_channel;
 	unsigned int	batt_temp_channel;
