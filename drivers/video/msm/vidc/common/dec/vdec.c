@@ -2517,6 +2517,7 @@ static u32 vid_dec_close_client(struct video_client_ctx *client_ctx)
 {
 	struct vid_dec_msg *vdec_msg;
 	u32 vcd_status;
+	int rc;
 
 	DBG("msm_vidc_dec: Inside %s()", __func__);
 	if (!client_ctx || (!client_ctx->vcd_handle)) {
@@ -2530,8 +2531,16 @@ static u32 vid_dec_close_client(struct video_client_ctx *client_ctx)
 		client_ctx->stop_sync_cb = true;
 		vcd_status = vcd_stop(client_ctx->vcd_handle);
 		DBG("\n Stuck at the stop call");
-		if (!vcd_status)
-			wait_for_completion(&client_ctx->event);
+		if (!vcd_status) {
+			rc = wait_for_completion_timeout(&client_ctx->event,
+							msecs_to_jiffies(500));
+			if (!rc)
+				ERR("%s:ERROR vcd_stop time out  rc = %d\n",
+			       __func__, rc);
+			if (client_ctx->event_status)
+				ERR("%s:ERROR vcd_stop event_status failure\n",
+					__func__);
+		}
 		DBG("\n Came out of wait event");
 	}
 	mutex_lock(&client_ctx->msg_queue_lock);
