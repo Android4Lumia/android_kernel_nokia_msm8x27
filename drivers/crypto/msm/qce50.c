@@ -2167,6 +2167,12 @@ int qce_aead_req(void *handle, struct qce_req *q_req)
 	ce_burst_size = pce_dev->ce_sps.ce_burst_size;
 	if (q_req->dir == QCE_ENCRYPT) {
 		q_req->cryptlen = areq->cryptlen;
+		if ((q_req->cryptlen > UINT_MAX - areq->assoclen) ||
+			(q_req->cryptlen + areq->assoclen >
+			UINT_MAX - ivsize)) {
+			pr_err("Integer overflow on total aead req length.\n");
+			return -EINVAL;
+		}
 			totallen_in = q_req->cryptlen + areq->assoclen + ivsize;
 		if (q_req->mode == QCE_MODE_CCM) {
 			out_len = areq->cryptlen + authsize;
@@ -2176,6 +2182,12 @@ int qce_aead_req(void *handle, struct qce_req *q_req)
 		}
 	} else {
 		q_req->cryptlen = areq->cryptlen - authsize;
+		if ((q_req->cryptlen > UINT_MAX - areq->assoclen) ||
+			(q_req->cryptlen + areq->assoclen >
+			UINT_MAX - ivsize)) {
+			pr_err("Integer overflow on total aead req length.\n");
+			return -EINVAL;
+		}
 		if (q_req->mode == QCE_MODE_CCM)
 			totallen_in = areq->cryptlen + areq->assoclen;
 		else
