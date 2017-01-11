@@ -121,6 +121,12 @@ static struct kgsl_device_iommu_data kgsl_3d0_iommu_data[] = {
 
 static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 	.pwrlevel = {
+			
+		{
+ 			.gpu_freq = 500000000,
+ 			.bus_freq = 4,
+ 			.io_fraction = 0,
+ 		},
 		{
 			.gpu_freq = 400000000,
 			.bus_freq = 3,
@@ -142,7 +148,7 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 		},
 	},
 	.init_level = 1,
-	.num_levels = 4,
+	.num_levels = 5,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/12,
 	.strtstp_sleepwake = false,
@@ -172,7 +178,7 @@ void __init msm8930_init_gpu(void)
 
 	if (cpu_is_msm8930aa())
 		kgsl_3d0_pdata.pwrlevel[0].gpu_freq = 450000000;
-	else if (cpu_is_msm8930ab()) {
+	else if (cpu_is_msm8930ab() || true) {
 		kgsl_3d0_pdata.pwrlevel[0].gpu_freq = 500000000;
 		grp3d_max_vectors[0].ib = KGSL_CONVERT_TO_MBPS(4800);
 	}
