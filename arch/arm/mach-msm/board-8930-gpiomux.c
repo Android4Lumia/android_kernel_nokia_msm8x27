@@ -900,7 +900,7 @@ static struct msm_gpiomux_config msm8930_haptics_configs[] __initdata = {
 static struct gpiomux_setting sd_det_line = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_2MA,
-	.pull = GPIOMUX_PULL_NONE,
+	.pull = GPIOMUX_PULL_DOWN,
 };
 
 static struct msm_gpiomux_config msm8930_sd_det_config[] __initdata = {
