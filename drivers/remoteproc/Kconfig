@@ -25,4 +25,14 @@ config OMAP_REMOTEPROC
 	  It's safe to say n here if you're not interested in multimedia
 	  offloading or just want a bare minimum kernel.
 
+config QCOM_WCNSS_PIL
+	tristate "Qualcomm WCNSS Peripheral Image Loader"
+	#depends on ARCH_QCOM
+	select QCOM_MDT_LOADER
+	select QCOM_SCM
+	select REMOTEPROC
+	help
+	  Say y here to support the Peripherial Image Loader for the Qualcomm
+	  Wireless Connectivity Subsystem.
+
 endmenu
