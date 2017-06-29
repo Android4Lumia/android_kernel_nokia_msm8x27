@@ -376,6 +376,9 @@ __generic_file_splice_read(struct file *in, loff_t *ppos,
 		index++;
 	}
 
+	if (unlikely(!(in->f_mode & FMODE_SPLICE_READ)))
+		return -EINVAL;
+
 	/*
 	 * Now loop over the map and see if we need to start IO on any
 	 * pages, fill in the partial map, etc.
@@ -985,12 +988,16 @@ generic_file_splice_write(struct pipe_inode_info *pipe, struct file *out,
 	struct address_space *mapping = out->f_mapping;
 	struct inode *inode = mapping->host;
 	struct splice_desc sd = {
-		.total_len = len,
 		.flags = flags,
-		.pos = *ppos,
 		.u.file = out,
 	};
 	ssize_t ret;
+
+	ret = generic_write_checks(out, ppos, &len, S_ISBLK(inode->i_mode));
+	if (ret)
+		return ret;
+	sd.total_len = len;
+	sd.pos = *ppos;
 
 	pipe_lock(pipe);
 
@@ -1054,6 +1061,9 @@ static ssize_t default_file_splice_write(struct pipe_inode_info *pipe,
 					 size_t len, unsigned int flags)
 {
 	ssize_t ret;
+
+	if (unlikely(!(out->f_mode & FMODE_SPLICE_WRITE)))
+		return -EINVAL;
 
 	ret = splice_from_pipe(pipe, out, ppos, len, flags, write_pipe_buf);
 	if (ret > 0)

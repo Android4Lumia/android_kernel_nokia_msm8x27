@@ -36,6 +36,8 @@
 #define D(fmt, args...) do {} while (0)
 #endif
 
+#define UINT32_MAX       (4294967295U)
+
 static int msm_mctl_pp_buf_divert(
 			struct msm_cam_media_controller *pmctl,
 			struct msm_cam_v4l2_dev_inst *pcam_inst,
@@ -668,11 +670,24 @@ int msm_mctl_pp_done(
 			dirty = 1;
 		}
 	} else {
-		if (frame.num_planes > 1)
+		if (frame.num_planes > 1) {
+			if (frame.mp[0].phy_addr >
+					(UINT32_MAX - frame.mp[0].data_offset)) {
+				pr_err("%s:%d Invalid data offset\n", __func__, __LINE__);
+				return -EINVAL;
+
+			}
 			buf.ch_paddr[0] = frame.mp[0].phy_addr +
 						frame.mp[0].data_offset;
-		else
+		} else {
+				if (frame.sp.phy_addr >
+					(UINT32_MAX - frame.sp.y_off)) {
+					pr_err("%s:%d Invalid Y offset\n", __func__, __LINE__);
+					return -EINVAL;
+
+				}
 			buf.ch_paddr[0] = frame.sp.phy_addr + frame.sp.y_off;
+		}
 	}
 	spin_unlock_irqrestore(&p_mctl->pp_info.lock, flags);
 
@@ -713,11 +728,24 @@ int msm_mctl_pp_divert_done(
 		buf_handle.image_mode = frame.image_type;
 	}
 
-	if (frame.num_planes > 1)
+	if (frame.num_planes > 1) {
+			if (frame.mp[0].phy_addr >
+					(UINT32_MAX - frame.mp[0].data_offset)) {
+				pr_err("%s:%d Invalid data offset\n", __func__, __LINE__);
+				return -EINVAL;
+
+			}
 		buf.ch_paddr[0] = frame.mp[0].phy_addr +
 					frame.mp[0].data_offset;
-	else
+	} else {
+			if (frame.sp.phy_addr >
+				(UINT32_MAX - frame.sp.y_off)) {
+				pr_err("%s:%d Invalid Y offset\n", __func__, __LINE__);
+				return -EINVAL;
+
+			}
 		buf.ch_paddr[0] = frame.sp.phy_addr + frame.sp.y_off;
+	}
 
 	spin_unlock_irqrestore(&p_mctl->pp_info.lock, flags);
 
