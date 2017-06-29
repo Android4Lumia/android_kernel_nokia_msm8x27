@@ -374,19 +374,6 @@ static void internal_add_timer(struct tvec_base *base, struct timer_list *timer)
 	list_add_tail(&timer->entry, vec);
 }
 
-static void internal_add_timer(struct tvec_base *base, struct timer_list *timer)
-{
-	__internal_add_timer(base, timer);
-	/*
-	 * Update base->active_timers and base->next_timer
-	 */
-	if (!tbase_get_deferrable(timer->base)) {
-		if (time_before(timer->expires, base->next_timer))
-			base->next_timer = timer->expires;
-		base->active_timers++;
-	}
-}
-
 #ifdef CONFIG_DEBUG_OBJECTS_TIMERS
 
 static struct debug_obj_descr timer_debug_descr;
