@@ -322,7 +322,11 @@ static int __devinit pil_riva_probe(struct platform_device *pdev)
 	desc->owner = THIS_MODULE;
 	desc->proxy_timeout = 10000;
 
+#ifdef CONFIG_PIL_RIVA_NON_SECURE
+	if (0) {
+#else
 	if (pas_supported(PAS_WCNSS) > 0) {
+#endif
 		desc->ops = &pil_riva_ops_trusted;
 		dev_info(&pdev->dev, "using secure boot\n");
 	} else {

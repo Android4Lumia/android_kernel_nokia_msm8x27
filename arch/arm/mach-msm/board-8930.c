@@ -1971,7 +1971,7 @@ static struct synaptics_rmi4_capacitance_button_map_info synaptic_rmi4_button_in
 	{ KEY_HOMEPAGE, 197, 830, 100, 55 },
 	{ KEY_MENU, 372, 830, 100, 55 }
 };
-							
+
 static struct synaptics_rmi4_capacitance_button_map synaptic_rmi4_button_map = {
 	.nbuttons = ARRAY_SIZE(synaptic_rmi4_button_infos),
 	.map = synaptic_rmi4_button_infos,
@@ -3104,6 +3104,12 @@ static void __init msm8930_cdp_init(void)
 			/* Assuming all other versions do not support 48MHz */
 			qcom_wcnss_pdata.has_48mhz_xo = 0;
 	}
+#ifdef CONFIG_MSM8627_WCNSS_NO_48MHZ
+	if (cpu_is_msm8627()) {
+		printk("#### NeoH - WiFi hack\n");
+		qcom_wcnss_pdata.has_48mhz_xo = 0;
+	}
+#endif
 	platform_add_devices(common_devices, ARRAY_SIZE(common_devices));
 	if (machine_is_msm8930_evt() &&
 		(socinfo_get_platform_subtype() == PLATFORM_SUBTYPE_SGLTE)) {

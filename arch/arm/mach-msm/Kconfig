@@ -924,7 +924,16 @@ endmenu
 source "arch/arm/mach-msm/lge/Kconfig"
 
 config MSM_NOT_ENOUGH_RAM
-	bool "Device only has 512MB RAM"
+	bool "!!!HACK!!! MSM8930: Device only has 512MB RAM"
+	default n
+
+config MSM8627_WCNSS_NO_48MHZ
+	depends on ARCH_MSM8930
+	bool "!!!HACK!!! MSM8627: WCNSS does not use 48MHz"
+	default n
+
+config PIL_RIVA_NON_SECURE
+	bool "!!!HACK!!! WCNSS Riva: Do not use secure boot"
 	default n
 
 config MSM_STACKED_MEMORY
