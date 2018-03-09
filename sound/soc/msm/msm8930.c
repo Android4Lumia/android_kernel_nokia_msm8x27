@@ -55,7 +55,7 @@
 #define GPIO_HS_US_EURO_SEL_GPIO 80
 #define GPIO_HS_US_EURO_SEL_GPIO_SGLTE 66
 
-#define GPIO_HS_DET 37
+#define GPIO_HS_DET 43
 #define GPIO_HS_DET_SGLTE 50
 
 #define PM8038_GPIO_BASE		NR_GPIO_IRQS
@@ -120,7 +120,7 @@ static struct sitar_mbhc_config mbhc_cfg = {
 	.mclk_rate = SITAR_EXT_CLK_RATE,
 	.gpio = 0,
 	.gpio_irq = 0,
-	.gpio_level_insert = 1,
+	.gpio_level_insert = 0,
 	.swap_gnd_mic = NULL,
 };
 
@@ -871,10 +871,9 @@ static int msm8930_audrx_init(struct snd_soc_pcm_runtime *rtd)
 		machine_is_msm8930_cdp())
 		mbhc_cfg.swap_gnd_mic = msm8930_swap_gnd_mic;
 
-	if (socinfo_get_platform_subtype() == PLATFORM_SUBTYPE_SGLTE) {
+	if (socinfo_get_platform_subtype() == PLATFORM_SUBTYPE_SGLTE)
 		mbhc_cfg.gpio = GPIO_HS_DET_SGLTE;
-		mbhc_cfg.gpio_level_insert = 0;
-	} else
+	else
 		mbhc_cfg.gpio = GPIO_HS_DET;
 
 	/*

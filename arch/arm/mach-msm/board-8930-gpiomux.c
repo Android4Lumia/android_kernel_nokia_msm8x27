@@ -574,13 +574,13 @@ static struct msm_gpiomux_config msm8930_sglte_gsbi_configs[] __initdata = {
 
 static struct msm_gpiomux_config msm8960_slimbus_config[] __initdata = {
 	{
-		.gpio	= 60,		/* slimbus data */
+		.gpio	= 61,		/* slimbus data */
 		.settings = {
 			[GPIOMUX_SUSPENDED] = &slimbus,
 		},
 	},
 	{
-		.gpio	= 61,		/* slimbus clk */
+		.gpio	= 60,		/* slimbus clk */
 		.settings = {
 			[GPIOMUX_SUSPENDED] = &slimbus,
 		},
