@@ -977,6 +977,15 @@ config TOUCHSCREEN_SYNAPTICS_I2C_RMI4
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called synaptics_i2c_rmi4.
+	  
+config TOUCHSCREEN_SYNAPTICS_UNOFFICIAL
+	tristate "Unofficial Synaptics DSX I2C touchscreen"
+	depends on TOUCHSCREEN_SYNAPTICS_I2C_RMI4
+	help
+	  Say Y here if you have an unofficial touchscreen
+	  connected to your system.
+
+	  If unsure, say N.
 
 config TOUCHSCREEN_SYNAPTICS_DSX_RMI4_DEV
 	tristate "Synaptics I2C touchscreen rmi device"
