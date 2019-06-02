@@ -188,6 +188,8 @@ struct synaptics_rmi4_device_info {
  * @i2c_read: pointer to i2c read function
  * @i2c_write: pointer to i2c write function
  * @irq_enable: pointer to irq enable function
+ * @old_x: stores previous X axis value
+ * @old_y: stores previous Y axis value
  */
 struct synaptics_rmi4_data {
 	struct i2c_client *i2c_client;
@@ -228,6 +230,10 @@ struct synaptics_rmi4_data {
 			unsigned char *data, unsigned short length);
 	int (*irq_enable)(struct synaptics_rmi4_data *rmi4_data, bool enable);
 	int (*reset_device)(struct synaptics_rmi4_data *rmi4_data);
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_UNOFFICIAL
+	int old_x;
+	int old_y;
+#endif
 #ifdef CONFIG_FB
 	struct notifier_block fb_notif;
 #else
