@@ -135,8 +135,10 @@ static ssize_t kcal_store(struct device *dev, struct device_attribute *attr,
 	}
 
 	pr_info("%s: New calibration: r=%d g=%d b=%d\n", __func__, kcal_r, kcal_g, kcal_b);
-//	kcal_tuning_apply();
 
+#ifndef CONFIG_LOCALDEVICESAND
+	kcal_tuning_apply();
+#endif
 	return count;
 }
 
