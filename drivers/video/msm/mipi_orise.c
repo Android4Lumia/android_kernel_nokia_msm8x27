@@ -30,6 +30,7 @@
 #define CMI_PANEL_V2_ID 0x47
 #define CMI_PANEL_V3_ID 0x48
 
+#define TEISKO_PANEL_ID 0xc1
 #define RACE_PANEL_ID 0xe3
 
 static struct dsi_buf orise_tx_buf;
@@ -1010,6 +1011,27 @@ static struct dsi_cmd_desc orise_race_video_off_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(enter_sleep), enter_sleep},
 };
 /* ----------- [For RACE panel setting End] ----------- */
+/* ----------- [For TEISKO panel setting Start] ----------- */
+/* Nokia TEISKO DSI CMD Panel START */
+static char teisko_set_pixel_format[2] = {0x36, 0x00};	/* DTYPE_DCS_WRITE1 */
+static char teisko_ctrl_display[2] = {0x53, 0x24};	/* DTYPE_DCS_WRITE1 */
+
+static char teisko_unknown_cmd[2] = {0xff, 0x78};	/* DTYPE_GEN_LWRITE? */
+
+static struct dsi_cmd_desc orise_teisko_video_on_cmds[] = {
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(exit_sleep), exit_sleep},
+	{DTYPE_GEN_LWRITE, 1, 0, 0, 0, sizeof(teisko_unknown_cmd), teisko_unknown_cmd},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(teisko_set_pixel_format), teisko_set_pixel_format},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(teisko_ctrl_display), teisko_ctrl_display},
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(display_on), display_on},
+};
+
+static struct dsi_cmd_desc orise_teisko_video_off_cmds[] = {
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(display_off), display_off},
+	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(enter_sleep), enter_sleep},
+};
+
+/* ----------- [For TEISKO panel setting End] ----------- */
 //#if 0
 static struct dsi_cmd_desc orise_video_bkl_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 1, sizeof(write_display_brightness), write_display_brightness}
@@ -1094,6 +1116,10 @@ static int mipi_orise_lcd_on(struct platform_device *pdev)
 			rc = mipi_dsi_cmds_tx(&orise_tx_buf, orise_race_video_on_cmds,
 					ARRAY_SIZE(orise_race_video_on_cmds));
 			break;
+		case TEISKO_PANEL_ID:
+			rc = mipi_dsi_cmds_tx(&orise_tx_buf, orise_teisko_video_on_cmds,
+					ARRAY_SIZE(orise_teisko_video_on_cmds));
+			break;
 		default:
 			printk(KERN_ERR "[DISPLAY] illegal PID <0x%02x>\n", gPanelModel);
 			break;
@@ -1134,6 +1160,9 @@ static int mipi_orise_lcd_off(struct platform_device *pdev)
 	else if(gPanelModel == RACE_PANEL_ID)
 		mipi_dsi_cmds_tx(&orise_tx_buf, orise_race_video_off_cmds,
 				ARRAY_SIZE(orise_race_video_off_cmds));
+	else if(gPanelModel == TEISKO_PANEL_ID)
+		mipi_dsi_cmds_tx(&orise_tx_buf, orise_teisko_video_off_cmds,
+				ARRAY_SIZE(orise_teisko_video_off_cmds));
 	else
 		mipi_dsi_cmds_tx(&orise_tx_buf, orise_video_off_cmds,
 				ARRAY_SIZE(orise_video_off_cmds));
