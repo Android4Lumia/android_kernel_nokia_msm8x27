@@ -1182,13 +1182,30 @@ static void mipi_orise_lcd_backlight(struct msm_fb_data_type *mfd)
 		return;
 
 	write_display_brightness[1] = mfd->bl_level;
+	mipi_dsi_wait4video_done();
 
-	down(&mfd->dma->mutex);
+	if (mdp_rev >= MDP_REV_41)
+		mutex_lock(&mfd->dma->ov_mutex);
+	else
+		down(&mfd->dma->mutex);
+	
 	mipi_set_tx_power_mode(0);
+
+	if (mfd->panel_info.type == MIPI_CMD_PANEL)
+		mipi_dsi_clk_cfg(1);	
+	
 	mipi_dsi_cmds_tx(&orise_tx_buf, orise_video_bkl_cmds,
 			ARRAY_SIZE(orise_video_bkl_cmds));
+	
+	if (mfd->panel_info.type == MIPI_CMD_PANEL)
+		mipi_dsi_clk_cfg(0);	
+	
 	mipi_set_tx_power_mode(1);
-	up(&mfd->dma->mutex);
+
+	if (mdp_rev >= MDP_REV_41)
+		mutex_unlock(&mfd->dma->ov_mutex);
+	else	
+		up(&mfd->dma->mutex);
 //#endif
 }
 
