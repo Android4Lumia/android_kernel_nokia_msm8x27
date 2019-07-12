@@ -1820,41 +1820,83 @@ static const u8 mxt_config_data_8930_v1[] = {
 	 0, 0, 0, 0,
 };
 
+
 static const u8 mxt_config_data_8930_v2[] = {
 	/* T6 Object */
 	 0, 0, 0, 0, 0, 0,
 	/* T38 Object */
-	 15, 4, 0, 9, 7, 12, 0, 0,
+	 15, 3, 0, 15, 12, 11, 0, 0,
+	/* T71 Object */
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0,	
 	/* T7 Object */
-	32, 16, 50,
+	 32, 255, 50, 2,
 	/* T8 Object */
-	 30, 0, 5, 10, 0, 0, 10, 10, 0, 0,
+//	 30, 0, 5, 1, 0, 0, 8, 8, 0, 0,
+	 28, 0, 20, 20, 0, 0, 0, 0, 10, -80,
+//	0x1D, 0x00, 0x05, 0x01, 0x00, 0x00, 0x04, 0x19, 0x05, 0x87,
 	/* T9 Object */
-	 131, 0, 0, 19, 11, 0, 16, 50, 1, 3,
-	 12, 7, 2, 0, 4, 5, 2, 10, 43, 4,
-	 54, 2, -25, 29, 38, 18, 143, 40, 207, 80,
-	 17, 5, 50, 50, 0,
+	 143, 0, 1, 18, 11, 0, 112, 50, 2, 5,
+	 10, 3, 1, 15, 10, 10, 20, 10, 0x1F, 0x03,
+	 0xDF, 0x01, 7, 7, 14, 14, 173, 37, 188, 56,
+	 10, 5, 47, 47, 3, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0,
+//	0x83, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x70, 0x32, 0x02, 0x01,
+//	10, 0x0A, 0x01, 0x3F, 0x0A, 0x0F, 0x1E, 0x0A, 0x1F, 0x03,
+//	0xDF, 0x01, 0x00, 0x0a, 0x14, 0x14, 0x80, 0x00, 0xc0, 0x00,
+//	0x14, 0x0F, 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0,
+//	0, 0, 0, 0, 0, 0, 0,
+	/* T15 Object */
+//	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//	 0,
+	 0x87, 0, 0, 3, 1, 0, 0x60, 0x1E, 2, 0, 
+	 0,
 	/* T18 Object */
-	 0, 0,
+	 4, 0,
+//	 0, 0,
 	/* T19 Object */
-	 0, 0, 0, 0, 0, 0,
+	 1, 0, 0, 12, 0, 0,
+//	 0, 0, 0, 0, 0, 0,
 	/* T25 Object */
-	 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0,
 	/* T42 Object */
-	 3, 60, 20, 20, 150, 0, 0, 0,
+// 	 3, 60, 20, 20, 150, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	/* T46 Object */
-	 0, 3, 28, 28, 0, 0, 1, 0, 0,
+//	 0x4, 0, 0x10, 0x20, 0, 3, 1, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	/* T47 Object */
 	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	/* T48 Object */
-	 1, 3, 82, 0, 0, 0, 0, 0, 0, 0,
-	 16, 30, 0, 6, 6, 0, 0, 124, 4, 100,
-	 0, 0, 0, 5, 0, 42, 0, 1, 0, 40,
-	 52, 20, 0, 0, 0, 50, 1, 5, 2, 1,
-	 4, 5, 3, -25, 29, 38, 18, 143, 40, 207,
-	 80, 10, 5, 2,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0,
 	/* T55 Object */
-	0, 0, 0, 0,
+//	 6, 1, 20, 64, 12, 128, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	/* T56 Object */
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//	 0x02, 0x00, 0x01, 0x35, 0x0C, 0x10, 0x0B, 0x10, 0x10, 0x0F,
+//	 0x10, 0x0E, 0x10, 0x10, 0x10, 0x13, 0x13, 0x14, 0x14, 0x13,
+//	 0x13, 0x13, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	/* T65 Object */
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	 0,
+	/* T66 Object */
+	 0, 0, 0, 0, 0,
+	/* Unknown Object(s) */
+	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 #if 0
@@ -1929,40 +1971,67 @@ static struct mxt_config_info mxt_config_array[] = {
 		.config			= mxt_config_data_8930_v2,
 		.config_length		= ARRAY_SIZE(mxt_config_data_8930_v2),
 		.family_id		= 0x81,
-		.variant_id		= 0x01,
+		.variant_id		= 0x1D,
 		.version		= 0x20,
-		.build			= 0xAB,
+		.build			= 0xAA,
 		.bootldr_id		= MXT_BOOTLOADER_ID_224E,
 	},
+	{
+		.config			= mxt_config_data_8930_v2,
+		.config_length		= ARRAY_SIZE(mxt_config_data_8930_v2),
+		.family_id		= 0x82,
+		.variant_id		= 0x1D,
+		.version		= 0x20,
+		.build			= 0xAA,
+	},
+};
+
+static int mxt_key_codes[MXT_KEYARRAY_MAX_KEYS] = {
+	[0] = KEY_BACK,	
+	[1] = KEY_MENU,
+	[2] = KEY_HOMEPAGE,
 };
 
 static struct mxt_platform_data mxt_platform_data_8930 = {
 	.config_array		= mxt_config_array,
 	.config_array_size	= ARRAY_SIZE(mxt_config_array),
 	.panel_minx		= 0,
-	.panel_maxx		= 566,
+	.panel_maxx		= 480,
 	.panel_miny		= 0,
-	.panel_maxy		= 1067,
+	.panel_maxy		= 800,
 	.disp_minx		= 0,
-	.disp_maxx		= 540,
+	.disp_maxx		= 480,
 	.disp_miny		= 0,
-	.disp_maxy		= 960,
+	.disp_maxy		= 800,
 	.irqflags		= IRQF_TRIGGER_FALLING,
-#ifdef MSM8930_PHASE_2
+//#ifdef MSM8930_PHASE_2
 	.digital_pwr_regulator	= true,
-#endif
-	.i2c_pull_up		= true,
+//#endif
+	.i2c_pull_up		= false,
 	.reset_gpio		= MXT_TS_RESET_GPIO,
 	.irq_gpio		= MXT_TS_GPIO_IRQ,
+	.i2cmode_gpio		= 999,
+	.key_codes		= mxt_key_codes,
 };
 
+#ifdef CONFIG_DEVICESAND
 static struct i2c_board_info mxt_device_info_8930[] __initdata = {
 	{
-		I2C_BOARD_INFO("atmel_mxt_ts", 0x4a),
+		I2C_BOARD_INFO("atmel_mxt_ts", 0x4B),
 		.platform_data = &mxt_platform_data_8930,
 		.irq = MSM_GPIO_TO_INT(MXT_TS_GPIO_IRQ),
 	},
 };
+#endif
+#ifndef CONFIG_DEVICESAND
+static struct i2c_board_info mxt_device_info_8930[] __initdata = {
+	{
+		I2C_BOARD_INFO("atmel_mxt_ts", 0x4A),
+		.platform_data = &mxt_platform_data_8930,
+		.irq = MSM_GPIO_TO_INT(MXT_TS_GPIO_IRQ),
+	},
+};
+#endif
 
 /*»     Synaptics Thin Driver»  */
 
@@ -1991,12 +2060,22 @@ static struct synaptics_rmi4_platform_data rmi4_platformdata = {
 	.capacitance_button_map = &synaptic_rmi4_button_map,
 };
 
+#ifndef CONFIG_DEVICESAND
 static struct i2c_board_info rmi4_i2c_devices[] = {
 	{
 		I2C_BOARD_INFO("synaptics_rmi4_i2c", 0x4B),
-		.platform_data = &rmi4_platformdata,
+		.platform_data = &rmi4_platformdata,	
 	},
 };
+#endif
+#ifdef CONFIG_DEVICESAND
+static struct i2c_board_info rmi4_i2c_devices[] = {
+	{
+		I2C_BOARD_INFO("synaptics_rmi4_i2c", 0x4A),
+		.platform_data = &rmi4_platformdata,	
+	},
+};
+#endif
 
 /* ETZKX KXCNL */
 #ifdef CONFIG_ETZKX_ACCEL
