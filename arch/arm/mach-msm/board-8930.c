@@ -2014,7 +2014,7 @@ static struct mxt_platform_data mxt_platform_data_8930 = {
 	.key_codes		= mxt_key_codes,
 };
 
-#ifdef CONFIG_DEVICESAND
+#ifdef CONFIG_LOCALDEVICESAND
 static struct i2c_board_info mxt_device_info_8930[] __initdata = {
 	{
 		I2C_BOARD_INFO("atmel_mxt_ts", 0x4B),
@@ -2023,7 +2023,7 @@ static struct i2c_board_info mxt_device_info_8930[] __initdata = {
 	},
 };
 #endif
-#ifndef CONFIG_DEVICESAND
+#ifndef CONFIG_LOCALDEVICESAND
 static struct i2c_board_info mxt_device_info_8930[] __initdata = {
 	{
 		I2C_BOARD_INFO("atmel_mxt_ts", 0x4A),
@@ -2060,7 +2060,7 @@ static struct synaptics_rmi4_platform_data rmi4_platformdata = {
 	.capacitance_button_map = &synaptic_rmi4_button_map,
 };
 
-#ifndef CONFIG_DEVICESAND
+#ifndef CONFIG_LOCALDEVICESAND
 static struct i2c_board_info rmi4_i2c_devices[] = {
 	{
 		I2C_BOARD_INFO("synaptics_rmi4_i2c", 0x4B),
@@ -2068,7 +2068,7 @@ static struct i2c_board_info rmi4_i2c_devices[] = {
 	},
 };
 #endif
-#ifdef CONFIG_DEVICESAND
+#ifdef CONFIG_LOCALDEVICESAND
 static struct i2c_board_info rmi4_i2c_devices[] = {
 	{
 		I2C_BOARD_INFO("synaptics_rmi4_i2c", 0x4A),
