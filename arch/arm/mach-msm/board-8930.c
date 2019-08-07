@@ -2068,14 +2068,14 @@ static struct i2c_board_info rmi4_i2c_devices[] = {
 	},
 };
 #endif
-//#ifdef CONFIG_LOCALDEVICESAND
-//static struct i2c_board_info rmi4_i2c_devices[] = {
-//	{
-//		I2C_BOARD_INFO("synaptics_rmi4_i2c", 0x4A),
-//		.platform_data = &rmi4_platformdata,	
-//	},
-//};
-//#endif
+#ifdef CONFIG_LOCALDEVICESAND
+static struct i2c_board_info rmi4_i2c_devices[] = {
+	{
+		I2C_BOARD_INFO("synaptics_rmi4_i2c", 0x4A),
+		.platform_data = &rmi4_platformdata,	
+	},
+};
+#endif
 
 /* ETZKX KXCNL */
 #ifdef CONFIG_ETZKX_ACCEL
