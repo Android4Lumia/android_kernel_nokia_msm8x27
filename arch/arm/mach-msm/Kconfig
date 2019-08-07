@@ -927,8 +927,8 @@ config MSM_NOT_ENOUGH_RAM
 	bool "!!!HACK!!! MSM8930: Device only has 512MB RAM"
 	default n
 
-config CONFIG_LOCALDEVICESAND
-	bool "!!!HACK!!! Bypass 620 color temp changes"
+config LOCALDEVICESAND
+	bool "!!!HACK!!! Bypass 620 color temp and force ATMEL on I2C"
 	default n
 
 config MSM8627_WCNSS_NO_48MHZ
