@@ -1121,7 +1121,7 @@ static int mxt_check_reg_init(struct mxt_data *data)
 		object = data->object_table + i;
 
 		
-		dev_err(dev, "object%d\n", object->type);
+		dev_dbg(dev, "object%d\n", object->type);
 
 
 		if (!mxt_object_writable(object->type))
@@ -1133,7 +1133,7 @@ static int mxt_check_reg_init(struct mxt_data *data)
 				dev_err(dev, "Not enough config data!\n");
 				return -EINVAL;
 			}
-			dev_err(dev, "byte\n");
+			dev_dbg(dev, "byte\n");
 			mxt_write_object(data, object->type, j,
 					 config_info->config[config_offset]);
 		}
