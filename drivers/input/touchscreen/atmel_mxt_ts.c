@@ -1083,18 +1083,18 @@ static irqreturn_t mxt_interrupt(int irq, void *dev_id)
 		if (reportid >= data->t9_min_reportid &&
 					reportid <= data->t9_max_reportid) {
 			mxt_input_touchevent(data, &message, id);
-			dev_err(dev, "T9 received\n");
+			dev_dbg(dev, "T9 received\n");
 		}
 		else if (reportid >= data->t15_min_reportid &&
 					reportid <= data->t15_max_reportid) {
 			mxt_handle_key_array(data, &message);
-			dev_err(dev, "T15 received\n");
+			dev_dbg(dev, "T15 received\n");
 		}
 		else if (reportid >= data->t42_min_reportid &&
 				reportid <= data->t42_max_reportid) {
 			mxt_handle_touch_suppression(data,
 					message.message[0]);
-			dev_err(dev, "T42 received\n");
+			dev_dbg(dev, "T42 received\n");
 		}
 		else
 			mxt_dump_message(dev, &message);
