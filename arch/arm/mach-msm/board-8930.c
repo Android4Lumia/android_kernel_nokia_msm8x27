@@ -2095,8 +2095,8 @@ static struct etzkx_platform_data etzkx_platformdata = {
 	.x_negate = 0,
 	.y_negate = 0,
 	.z_negate = 0,
-	.irq2 = 67,
-	.irq1 = 46,		
+//	.irq2 = 67,
+//	.irq1 = 46,		
 };
 
 static struct i2c_board_info etzkx_i2c_devices[] = {
