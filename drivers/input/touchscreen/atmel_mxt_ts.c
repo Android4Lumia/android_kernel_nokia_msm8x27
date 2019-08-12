@@ -551,7 +551,7 @@ static int mxt_switch_to_bootloader_address(struct mxt_data *data)
 		return -EINVAL;
 	}
 
-	dev_info(&client->dev, "Changing to bootloader address: 0x%02x -> 0x%02x",
+	dev_dbg(&client->dev, "Changing to bootloader address: 0x%02x -> 0x%02x",
 			client->addr, data->addr_pair.bootloader);
 
 	client->addr = data->addr_pair.bootloader;
@@ -568,7 +568,7 @@ static int mxt_switch_to_appmode_address(struct mxt_data *data)
 		return -EINVAL;
 	}
 
-	dev_info(&client->dev, "Changing to application mode address: " \
+	dev_dbg(&client->dev, "Changing to application mode address: " \
 			"0x%02x -> 0x%02x", client->addr,
 			data->addr_pair.application);
 
@@ -591,12 +591,12 @@ static int mxt_get_bootloader_version(struct i2c_client *client, u8 val)
 			return -EIO;
 		}
 
-		dev_info(&client->dev, "Bootloader ID:%d Version:%d",
+		dev_dbg(&client->dev, "Bootloader ID:%d Version:%d",
 			buf[1], buf[2]);
 
 		return buf[0];
 	} else {
-		dev_info(&client->dev, "Bootloader ID:%d",
+		dev_dbg(&client->dev, "Bootloader ID:%d",
 			val & MXT_BOOT_ID_MASK);
 
 		return val;
@@ -621,7 +621,7 @@ static int mxt_get_bootloader_id(struct i2c_client *client)
 		}
 		return buf[1];
 	} else {
-		dev_info(&client->dev, "Bootloader ID:%d",
+		dev_dbg(&client->dev, "Bootloader ID:%d",
 			val & MXT_BOOT_ID_MASK);
 
 		return val & MXT_BOOT_ID_MASK;
@@ -1010,7 +1010,7 @@ static void mxt_handle_key_array(struct mxt_data *data,
 		if (!(keys_changed & (1 << i)))
 			continue;
 
-		dev_info(&data->client->dev, "[%d] %d \n", data->pdata->key_codes[i], ((data->keyarray_new >> i) & 1));
+		dev_dbg(&data->client->dev, "[%d] %d \n", data->pdata->key_codes[i], ((data->keyarray_new >> i) & 1));
 		input_report_key(data->input_dev, data->pdata->key_codes[i],
 					((data->keyarray_new >> i) & 1));
 		input_sync(data->input_dev);
@@ -1379,7 +1379,7 @@ static int mxt_get_config(struct mxt_data *data)
 		dev_err(dev, "Unable to read config version\n");
 		return error;
 	}
-	dev_info(dev, "Current config version on the controller is %d.%d.%d\n",
+	dev_dbg(dev, "Current config version on the controller is %d.%d.%d\n",
 			data->cfg_version[0], data->cfg_version[1],
 			data->cfg_version[2]);
 
@@ -1587,7 +1587,7 @@ static int mxt_update_cfg(struct mxt_data *data)
 
 			cfg_ver = data->config_info->config +
 						data->cfg_version_idx;
-			dev_info(&data->client->dev,
+			dev_dbg(&data->client->dev,
 				"Config updated from %d.%d.%d to %d.%d.%d\n",
 				data->cfg_version[0], data->cfg_version[1],
 				data->cfg_version[2],
@@ -1596,7 +1596,7 @@ static int mxt_update_cfg(struct mxt_data *data)
 			memcpy(data->cfg_version, cfg_ver, MXT_CFG_VERSION_LEN);
 		}
 	} else {
-		dev_info(&data->client->dev,
+		dev_dbg(&data->client->dev,
 			"No cfg data defined, skipping check reg init\n");
 	}
 
@@ -1796,7 +1796,7 @@ static int mxt_load_fw(struct device *dev, const char *fn)
 		if (ret)
 			goto return_to_app_mode;
 	} else {
-		dev_info(dev, "Unlocking bootloader\n");
+		dev_dbg(dev, "Unlocking bootloader\n");
 		/* Unlock bootloader */
 		mxt_unlock_bootloader(client);
 	}
@@ -1951,7 +1951,7 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 		fw_name = data->fw_name;
 	}
 
-	dev_info(dev, "Upgrading the firmware file to %s\n", fw_name);
+	dev_dbg(dev, "Upgrading the firmware file to %s\n", fw_name);
 
 	disable_irq(data->irq);
 
@@ -1960,7 +1960,7 @@ static ssize_t mxt_update_fw_store(struct device *dev,
 		dev_err(dev, "The firmware update failed(%d)\n", error);
 		count = error;
 	} else {
-		dev_info(dev, "The firmware update succeeded\n");
+		dev_dbg(dev, "The firmware update succeeded\n");
 
 		/* Wait for reset */
 		msleep(MXT_FWRESET_TIME);
