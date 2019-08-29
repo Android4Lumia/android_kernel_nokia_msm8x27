@@ -16,6 +16,9 @@
 
 #include <linux/types.h>
 
+/* For key_map array */
+#define MXT_NUM_GPIO		4
+
 /* Orient */
 #define MXT_NORMAL		0x0
 #define MXT_DIAGONAL		0x1
@@ -32,8 +35,10 @@
 /* Bootoader IDs */
 #define MXT_BOOTLOADER_ID_224		0x0A
 #define MXT_BOOTLOADER_ID_224E		0x06
+#define MXT_BOOTLOADER_ID_336S		0x1A
 #define MXT_BOOTLOADER_ID_1386		0x01
 #define MXT_BOOTLOADER_ID_1386E		0x10
+#define MXT_BOOTLOADER_ID_1664S		0x14
 
 /* Config data for a given maXTouch controller with a specific firmware */
 struct mxt_config_info {
@@ -66,13 +71,20 @@ struct mxt_platform_data {
 	u32 disp_maxy;
 
 	unsigned long irqflags;
+	bool is_tp;
+	const unsigned int key_map[MXT_NUM_GPIO];
 	bool	i2c_pull_up;
 	bool	digital_pwr_regulator;
 	int reset_gpio;
 	u32 reset_gpio_flags;
 	int irq_gpio;
 	u32 irq_gpio_flags;
+	int i2cmode_gpio;	
 	int *key_codes;
+	bool need_calibration;
+	bool no_force_update;
+	bool no_lpm_support;
+	u8 bl_addr;	
 
 	u8(*read_chg) (void);
 	int (*init_hw) (bool);

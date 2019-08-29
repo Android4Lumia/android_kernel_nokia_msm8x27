@@ -63,6 +63,7 @@
 #define HDMI_PANEL_NAME	"hdmi_msm"
 #define TVOUT_PANEL_NAME	"tvout_msm"
 #define MIPI_VIDEO_ORISE_FWVGA_PANEL_NAME	"mipi_video_orise_fwvga"
+#define MIPI_CMD_ORISE_FWVGA_PANEL_NAME	"mipi_cmd_orise_fwvga"
 
 static struct resource msm_fb_resources[] = {
 	{
